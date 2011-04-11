@@ -1,0 +1,13 @@
+TYPEMAP
+DKIM_LIB *	T_PTR
+DKIM *		T_PTR
+DKIM_STAT	T_INT
+DKIM_STAT *	T_PTR
+dkim_canon_t	T_ENUM
+dkim_alg_t	T_ENUM
+off_t		T_LONG
+const void *	T_PTR
+# const unsigned char *	T_STRING
+const unsigned char *	T_PTR
+unsigned char **	T_PTR
+size_t *	T_PTR
