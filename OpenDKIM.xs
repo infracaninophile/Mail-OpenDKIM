@@ -33,3 +33,11 @@ _dkim_close(d)
 		DKIM_LIB *d
 	CODE:
 		dkim_close(d);
+
+int
+_dkim_flush_cache(d)
+		DKIM_LIB *d
+	CODE:
+		RETVAL = dkim_flush_cache(d);
+	OUTPUT:
+		RETVAL

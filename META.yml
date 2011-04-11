@@ -1,7 +1,7 @@
 --- #YAML:1.0
 name:               Mail-OpenDKIM
 version:            0.01
-abstract:           Perl extension for blah blah blah
+abstract:           Perl interface to the OpenDKIM library
 author:
     - Nigel Horne <nigel@kcilink.com>
 license:            unknown

@@ -17,7 +17,7 @@ our @ISA = qw(Exporter);
 # If you do not need this, moving things directly into @EXPORT or @EXPORT_OK
 # will save memory.
 our %EXPORT_TAGS = ( 'all' => [ qw(
-	DKIM_STAT_OK
+
 ) ] );
 
 use constant DKIM_CANON_SIMPLE => 0;	# RFC4871
@@ -85,6 +85,16 @@ sub dkim_close
 	$self->{_dkimlib_handle} = undef;
 }
 
+sub dkim_flush_cache
+{
+	my $self = shift;
+
+	unless($self->{_dkimlib_handle}) {
+		throw Error::Simple('dkim_flush_cache called before dkim_init');
+	}
+	return _dkim_flush_cache($self->{_dkimlib_handle});
+}
+
 sub dkim_sign
 {
 	my ($self, $args) = @_;
@@ -147,6 +157,8 @@ Blah blah blah.
 =head2 dkim_init
 
 =head2 dkim_close
+
+=head2 dkim_flush_cache
 
 =head2 dkim_sign
 

@@ -11,6 +11,7 @@ lib/Mail/OpenDKIM/DKIM.pm
 typemap
 t/00-load.t
 t/boilerplate.t
+t/dkim_flush_cache.t
 t/manifest.t
 t/pod-coverage.t
 t/pod.t
