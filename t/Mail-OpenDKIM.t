@@ -24,6 +24,8 @@ EOF
 	my $o = new_ok('Mail::OpenDKIM');
 	ok($o->dkim_init());
 
+	my $d;
+
 	try {
 		$d = $o->dkim_sign({
 			id => 'MLM',

@@ -21,6 +21,19 @@ dkim_ssl_version()
 	OUTPUT:
 		RETVAL
 
+DKIM_STAT
+_dkim_getcachestats(queries, hits, expired)
+		unsigned int queries = NO_INIT
+		unsigned int hits = NO_INIT
+		unsigned int expired = NO_INIT
+	CODE:
+		RETVAL = dkim_getcachestats(&queries, &hits, &expired);
+	OUTPUT:
+		queries
+		hits
+		expired
+		RETVAL
+
 DKIM_LIB *
 _dkim_init()
 	CODE:

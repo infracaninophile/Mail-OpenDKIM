@@ -29,6 +29,7 @@ use constant DKIM_SIGN_RSASHA256 => 1;
 
 use constant DKIM_STAT_OK => 0;	# dkim.h
 use constant DKIM_STAT_NORESOURCE => 6;
+use constant DKIM_STAT_NOTIMPLEMENT => 10;
 
 our @EXPORT_OK = ( @{ $EXPORT_TAGS{'all'} } );
 
@@ -39,6 +40,7 @@ our @EXPORT = qw(
 	DKIM_SIGN_RSASHA256
 	DKIM_STAT_OK
 	DKIM_STAT_NORESOURCE
+	DKIM_STAT_NOTIMPLEMENT
 );
 
 our $VERSION = '0.01';
@@ -119,6 +121,13 @@ sub dkim_sign
 	return $dkim;
 }
 
+sub dkim_getcachestats
+{
+	my ($self, $args) = @_;
+
+	return _dkim_getcachestats($$args{queries}, $$args{hits}, $$args{expired});
+}
+
 sub DESTROY
 {
 	my $self = shift;
@@ -162,9 +171,15 @@ Blah blah blah.
 
 =head2 dkim_sign
 
+Returns an Mail::OpenDKIM::DKIM object
+
 =head2 dkim_ssl_version
 
-Returns an Mail::OpenDKIM::DKIM object
+Static method.
+
+=head2 dkim_getcachestats
+
+Static method.
 
 =head2 EXPORT
 
