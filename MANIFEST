@@ -12,8 +12,9 @@ typemap
 t/00-load.t
 t/boilerplate.t
 t/dkim_flush_cache.t
+t/dkim_getcachestats.t
 t/manifest.t
 t/pod-coverage.t
 t/pod.t
-t/ssl_version.t
+t/dkim_ssl_version.t
 META.yml                                 Module meta-data (added by MakeMaker)
