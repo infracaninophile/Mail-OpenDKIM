@@ -11,3 +11,4 @@ const void *	T_PTR
 const unsigned char *	T_PTR
 unsigned char **	T_PTR
 size_t *	T_PTR
+_Bool	T_BOOL

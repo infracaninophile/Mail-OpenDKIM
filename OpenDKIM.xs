@@ -8,7 +8,7 @@
 
 /* h2xs -A -n Mail::OpenDKIM */
 
-MODULE = Mail::OpenDKIM		PACKAGE = Mail::OpenDKIM		
+MODULE = Mail::OpenDKIM		PACKAGE = Mail::OpenDKIM
 PROTOTYPES: DISABLE
 
 BOOT:
@@ -38,6 +38,15 @@ DKIM_LIB *
 _dkim_init()
 	CODE:
 		RETVAL = dkim_init(NULL, NULL);
+	OUTPUT:
+		RETVAL
+
+_Bool
+dkim_libfeature(d, fc)
+		DKIM_LIB *d
+		unsigned int fc
+	CODE:
+		RETVAL = dkim_libfeature(d, fc);
 	OUTPUT:
 		RETVAL
 

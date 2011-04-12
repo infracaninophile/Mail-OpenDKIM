@@ -6,7 +6,7 @@ use warnings;
 
 use Error;
 
-use Mail::OpenDKIM qw(DKIM_STAT_OK);
+use Mail::OpenDKIM;
 
 our $VERSION = '0.01';
 
@@ -118,11 +118,37 @@ sub dkim_getsighdr_d
 
 	my $len;
 
-	_dkim_getsighdr_d($self->{_dkim_handle}, $$args{initial}, $$args{buf}, $len);
+	my $rc = _dkim_getsighdr_d($self->{_dkim_handle}, $$args{initial}, $$args{buf}, $len);
 
-	$$args{len} = $len;
+	if($rc == DKIM_STAT_OK) {
+		$$args{len} = $len;
+	}
 
-	return 0;
+	return $rc;
+}
+
+sub dkim_get_signer
+{
+	my $self = shift;
+
+	unless($self->{_dkim_handle}) {
+		throw Error::Simple('dkim_get_signer called before dkim_sign');
+	}
+
+	return _dkim_get_signer($self->{_dkim_handle});
+}
+
+sub dkim_get_user_context
+{
+	my $self = shift;
+
+	unless($self->{_dkim_handle}) {
+		throw Error::Simple('dkim_get_user_context called before dkim_sign');
+	}
+
+	my $rc = _dkim_get_user_context($self->{_dkim_handle});
+
+	return ($rc == 0) ? undef : $rc;
 }
 
 sub dkim_geterror
@@ -200,6 +226,10 @@ For internal use by Mail::OpenDKIM only - do not call directly
 =head2 dkim_eom
 
 =head2 dkim_getsighdr_d
+
+=head2 dkim_get_signer
+
+=head2 dkim_get_user_context
 
 =head2 dkim_geterror
 

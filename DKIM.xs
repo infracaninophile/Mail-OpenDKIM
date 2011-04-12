@@ -73,6 +73,22 @@ _dkim_eom(dkim)
 	OUTPUT:
 		RETVAL
 
+char *
+_dkim_get_signer(dkim)
+		DKIM *dkim
+	CODE:
+		RETVAL = dkim_get_signer(dkim);
+	OUTPUT:
+		RETVAL
+
+void *
+_dkim_get_user_context(dkim)
+		DKIM *dkim
+	CODE:
+		RETVAL = dkim_get_user_context(dkim);
+	OUTPUT:
+		RETVAL
+
 DKIM_STAT
 _dkim_getsighdr_d(dkim, initial, buf, len)
 		DKIM *dkim

@@ -31,6 +31,16 @@ use constant DKIM_STAT_OK => 0;	# dkim.h
 use constant DKIM_STAT_NORESOURCE => 6;
 use constant DKIM_STAT_NOTIMPLEMENT => 10;
 
+use constant DKIM_FEATURE_DIFFHEADERS => 0;
+use constant DKIM_FEATURE_DKIM_REPUTATION => 1;
+use constant DKIM_FEATURE_PARSE_TIME => 2;
+use constant DKIM_FEATURE_QUERY_CACHE => 3;
+use constant DKIM_FEATURE_SHA256 => 4;
+use constant DKIM_FEATURE_OVERSIGN => 5;
+use constant DKIM_FEATURE_DNSSEC => 6;
+use constant DKIM_FEATURE_RESIGN => 7;
+use constant DKIM_FEATURE_ATPS => 8;
+
 our @EXPORT_OK = ( @{ $EXPORT_TAGS{'all'} } );
 
 our @EXPORT = qw(
@@ -41,6 +51,15 @@ our @EXPORT = qw(
 	DKIM_STAT_OK
 	DKIM_STAT_NORESOURCE
 	DKIM_STAT_NOTIMPLEMENT
+	DKIM_FEATURE_DIFFHEADERS
+	DKIM_FEATURE_DKIM_REPUTATION
+	DKIM_FEATURE_PARSE_TIME
+	DKIM_FEATURE_QUERY_CACHE
+	DKIM_FEATURE_SHA256
+	DKIM_FEATURE_OVERSIGN
+	DKIM_FEATURE_DNSSEC
+	DKIM_FEATURE_RESIGN
+	DKIM_FEATURE_ATPS
 );
 
 our $VERSION = '0.01';
@@ -95,6 +114,21 @@ sub dkim_flush_cache
 		throw Error::Simple('dkim_flush_cache called before dkim_init');
 	}
 	return _dkim_flush_cache($self->{_dkimlib_handle});
+}
+
+sub dkim_libfeature
+{
+	my ($self, $args) = @_;
+
+	unless($self->{_dkimlib_handle}) {
+		throw Error::Simple('dkim_libfeature called before dkim_init');
+	}
+	foreach(qw(feature)) {
+		exists($$args{$_}) or throw Error::Simple("dkim_libfeature missing argument '$_'");
+		defined($$args{$_}) or throw Error::Simple("dkim_libfeature undefined argument '$_'");
+	}
+
+	return _dkim_libfeature($self->{_dkmlib_handle}, $$args{feature});
 }
 
 sub dkim_sign
@@ -168,6 +202,8 @@ Blah blah blah.
 =head2 dkim_close
 
 =head2 dkim_flush_cache
+
+=head2 dkim_libfeature
 
 =head2 dkim_sign
 
