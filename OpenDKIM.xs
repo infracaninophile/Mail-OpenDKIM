@@ -8,6 +8,26 @@
 
 /* h2xs -A -n Mail::OpenDKIM */
 
+static SV *dns_callback = (SV *)NULL;
+
+static void
+call_dns_callback(const void *context)
+{
+	dSP;
+	SV *sv = dns_callback;
+
+	if(sv == NULL) {
+		croak("Internal error: call_dns_callback called, but nothing to call");
+		return;
+	}
+
+	PUSHMARK(SP);
+	XPUSHs(sv_2mortal(newSVpv(context, 0)));
+	PUTBACK;
+
+	call_sv(dns_callback, G_DISCARD);
+}
+
 MODULE = Mail::OpenDKIM		PACKAGE = Mail::OpenDKIM
 PROTOTYPES: DISABLE
 
@@ -15,6 +35,43 @@ unsigned long
 dkim_ssl_version()
 	CODE:
 		RETVAL = dkim_ssl_version();
+	OUTPUT:
+		RETVAL
+
+unsigned long
+dkim_libversion()
+	CODE:
+		RETVAL = dkim_libversion();
+	OUTPUT:
+		RETVAL
+
+DKIM_LIB *
+_dkim_init()
+	CODE:
+		RETVAL = dkim_init(NULL, NULL);
+	OUTPUT:
+		RETVAL
+
+void
+_dkim_close(d)
+		DKIM_LIB *d
+	CODE:
+		dkim_close(d);
+
+_Bool
+_dkim_libfeature(d, fc)
+		DKIM_LIB *d
+		unsigned int fc
+	CODE:
+		RETVAL = dkim_libfeature(d, fc);
+	OUTPUT:
+		RETVAL
+
+int
+_dkim_flush_cache(d)
+		DKIM_LIB *d
+	CODE:
+		RETVAL = dkim_flush_cache(d);
 	OUTPUT:
 		RETVAL
 
@@ -29,36 +86,6 @@ _dkim_getcachestats(queries, hits, expired)
 		queries
 		hits
 		expired
-		RETVAL
-
-DKIM_LIB *
-_dkim_init()
-	CODE:
-		RETVAL = dkim_init(NULL, NULL);
-	OUTPUT:
-		RETVAL
-
-_Bool
-_dkim_libfeature(d, fc)
-		DKIM_LIB *d
-		unsigned int fc
-	CODE:
-		RETVAL = dkim_libfeature(d, fc);
-	OUTPUT:
-		RETVAL
-
-void
-_dkim_close(d)
-		DKIM_LIB *d
-	CODE:
-		dkim_close(d);
-
-int
-_dkim_flush_cache(d)
-		DKIM_LIB *d
-	CODE:
-		RETVAL = dkim_flush_cache(d);
-	OUTPUT:
 		RETVAL
 
 DKIM *
@@ -78,6 +105,21 @@ _dkim_sign(libhandle, id, secretkey, selector, domain, hdrcanon_alg, bodycanon_a
 	OUTPUT:
 		RETVAL
 		statp
+
+DKIM_STAT
+_dkim_set_dns_callback(libopendkim, func, interval)
+		DKIM_LIB *libopendkim
+		SV *func
+		unsigned int interval
+	CODE:
+		if(dns_callback == (SV *)NULL)
+			dns_callback = newSVsv(func);
+		else
+			SvSetSV(dns_callback, func);
+
+		RETVAL = dkim_set_dns_callback(libopendkim, call_dns_callback, interval);
+	OUTPUT:
+		RETVAL
 
 DKIM_STAT
 _dkim_free(d)

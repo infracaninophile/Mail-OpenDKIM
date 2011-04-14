@@ -29,6 +29,7 @@ use constant DKIM_SIGN_RSASHA256 => 1;
 
 use constant DKIM_STAT_OK => 0;	# dkim.h
 use constant DKIM_STAT_NORESOURCE => 6;
+use constant DKIM_STAT_INVALID => 9;
 use constant DKIM_STAT_NOTIMPLEMENT => 10;
 
 use constant DKIM_FEATURE_DIFFHEADERS => 0;
@@ -48,9 +49,12 @@ our @EXPORT = qw(
 	DKIM_CANON_SIMPLE
 	DKIM_SIGN_RSASHA1
 	DKIM_SIGN_RSASHA256
+
 	DKIM_STAT_OK
 	DKIM_STAT_NORESOURCE
+	DKIM_STAT_INVALID
 	DKIM_STAT_NOTIMPLEMENT
+
 	DKIM_FEATURE_DIFFHEADERS
 	DKIM_FEATURE_DKIM_REPUTATION
 	DKIM_FEATURE_PARSE_TIME
@@ -162,6 +166,21 @@ sub dkim_getcachestats
 	return _dkim_getcachestats($$args{queries}, $$args{hits}, $$args{expired});
 }
 
+sub dkim_set_dns_callback()
+{
+	my ($self, $args) = @_;
+
+	unless($self->{_dkimlib_handle}) {
+		throw Error::Simple('dkim_set_dns_callback called before dkim_init');
+	}
+	foreach(qw(func interval)) {
+		exists($$args{$_}) or throw Error::Simple("dkim_set_dns_callback missing argument '$_'");
+		defined($$args{$_}) or throw Error::Simple("dkim_set_dns_callback undefined argument '$_'");
+	}
+
+	return _dkim_set_dns_callback($self->{_dkimlib_handle}, $$args{func}, $$args{interval});
+}
+
 sub DESTROY
 {
 	my $self = shift;
@@ -211,11 +230,15 @@ Returns an Mail::OpenDKIM::DKIM object
 
 =head2 dkim_ssl_version
 
+=head2 dkim_libversion
+
 Static method.
 
 =head2 dkim_getcachestats
 
 Static method.
+
+=head2 dkim_set_dns_callback
 
 =head2 EXPORT
 
