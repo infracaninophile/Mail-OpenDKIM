@@ -45,7 +45,7 @@ sub dkim_sign
 
 	my $statp;
 
-	$self->{_dkim_handle} = _dkim_sign($self->{_dkimlib_handle},
+	$self->{_dkim_handle} = Mail::OpenDKIM::_dkim_sign($self->{_dkimlib_handle},
 		$$args{id}, $$args{secretkey}, $$args{selector}, $$args{domain},
 		$$args{hdrcanon_alg}, $$args{bodycanon_alg}, $$args{sign_alg},
 		$$args{length}, $statp);
@@ -65,7 +65,7 @@ sub dkim_header
 		defined($$args{$_}) or throw Error::Simple("dkim_header undefined argument '$_'");
 	}
 
-	return _dkim_header($self->{_dkim_handle}, $$args{header}, $$args{len});
+	return Mail::OpenDKIM::_dkim_header($self->{_dkim_handle}, $$args{header}, $$args{len});
 }
 
 sub dkim_eoh
@@ -76,7 +76,7 @@ sub dkim_eoh
 		throw Error::Simple('dkim_eoh called before dkim_sign');
 	}
 
-	return _dkim_eoh($self->{_dkim_handle});
+	return Mail::OpenDKIM::_dkim_eoh($self->{_dkim_handle});
 }
 
 sub dkim_chunk
@@ -91,7 +91,7 @@ sub dkim_chunk
 		defined($$args{$_}) or throw Error::Simple("dkim_chunk undefined argument '$_'");
 	}
 
-	return _dkim_chunk($self->{_dkim_handle}, $$args{chunkp}, $$args{len});
+	return Mail::OpenDKIM::_dkim_chunk($self->{_dkim_handle}, $$args{chunkp}, $$args{len});
 }
 
 sub dkim_eom
@@ -102,7 +102,7 @@ sub dkim_eom
 		throw Error::Simple('dkim_eom called before dkim_sign');
 	}
 
-	return _dkim_eom($self->{_dkim_handle});
+	return Mail::OpenDKIM::_dkim_eom($self->{_dkim_handle});
 }
 
 sub dkim_getsighdr_d
@@ -118,7 +118,7 @@ sub dkim_getsighdr_d
 
 	my $len;
 
-	my $rc = _dkim_getsighdr_d($self->{_dkim_handle}, $$args{initial}, $$args{buf}, $len);
+	my $rc = Mail::OpenDKIM::_dkim_getsighdr_d($self->{_dkim_handle}, $$args{initial}, $$args{buf}, $len);
 
 	if($rc == DKIM_STAT_OK) {
 		$$args{len} = $len;
@@ -135,7 +135,7 @@ sub dkim_get_signer
 		throw Error::Simple('dkim_get_signer called before dkim_sign');
 	}
 
-	return _dkim_get_signer($self->{_dkim_handle});
+	return Mail::OpenDKIM::_dkim_get_signer($self->{_dkim_handle});
 }
 
 sub dkim_get_user_context
@@ -146,7 +146,7 @@ sub dkim_get_user_context
 		throw Error::Simple('dkim_get_user_context called before dkim_sign');
 	}
 
-	my $rc = _dkim_get_user_context($self->{_dkim_handle});
+	my $rc = Mail::OpenDKIM::_dkim_get_user_context($self->{_dkim_handle});
 
 	return ($rc == 0) ? undef : $rc;
 }
@@ -158,7 +158,7 @@ sub dkim_geterror
 		throw Error::Simple('dkim_geterror called before dkim_sign');
 	}
 
-	return _dkim_geterror($self->{_dkim_handle});
+	return Mail::OpenDKIM::_dkim_geterror($self->{_dkim_handle});
 }
 
 sub dkim_free
@@ -169,7 +169,7 @@ sub dkim_free
 		throw Error::Simple('dkim_free called before dkim_sign');
 	}
 
-	my $rc = _dkim_free($self->{_dkim_handle});
+	my $rc = Mail::OpenDKIM::_dkim_free($self->{_dkim_handle});
 
 	if($rc == DKIM_STAT_OK) {
 		$self->{_dkim_handle} = undef;

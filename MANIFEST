@@ -2,7 +2,6 @@ Changes
 Makefile.PL
 MANIFEST
 OpenDKIM.xs
-DKIM.xs
 ppport.h
 README
 t/Mail-OpenDKIM.t

@@ -128,7 +128,7 @@ sub dkim_libfeature
 		defined($$args{$_}) or throw Error::Simple("dkim_libfeature undefined argument '$_'");
 	}
 
-	return _dkim_libfeature($self->{_dkmlib_handle}, $$args{feature});
+	return _dkim_libfeature($self->{_dkimlib_handle}, $$args{feature});
 }
 
 sub dkim_sign
