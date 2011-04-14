@@ -9,7 +9,13 @@
 /* h2xs -A -n Mail::OpenDKIM */
 
 static SV *dns_callback = (SV *)NULL;
+static SV *final_callback = (SV *)NULL;
 
+
+/*
+ * called when the OpenDKIMlibrary wants to call the callback function provided to
+ * dkim_set_dns_callback
+ */
 static void
 call_dns_callback(const void *context)
 {
@@ -26,6 +32,47 @@ call_dns_callback(const void *context)
 	PUTBACK;
 
 	call_sv(dns_callback, G_DISCARD);
+}
+
+/*
+ * called when the OpenDKIMlibrary wants to call the callback function provided to
+ * dkim_set_final
+ */
+static DKIM_CBSTAT
+call_final_callback(DKIM *dkim, DKIM_SIGINFO **sigs, int nsigs)
+{
+	dSP;
+	int count, status;
+	SV *sv = final_callback;
+
+	if(sv == NULL) {
+		croak("Internal error: call_final_callback called, but nothing to call");
+		return;
+	}
+
+	PUSHMARK(SP);
+	XPUSHs(sv_2mortal(newSVpv((void *)dkim, 0)));
+	XPUSHs(sv_2mortal(newSVpv((void *)sigs, 0)));
+	XPUSHs(sv_2mortal(newSViv(nsigs)));
+	PUTBACK;
+
+	call_sv(final_callback, G_SCALAR);
+
+	SPAGAIN;
+
+	if(count != 1) {
+		croak("Internal error: final_callback routine returned %d items, 1 was expected",
+			count);
+		return;
+	}
+
+	status = POPi;
+
+	PUTBACK;
+	FREETMPS;
+	LEAVE;
+
+	return status;
 }
 
 MODULE = Mail::OpenDKIM		PACKAGE = Mail::OpenDKIM
@@ -118,6 +165,20 @@ _dkim_set_dns_callback(libopendkim, func, interval)
 			SvSetSV(dns_callback, func);
 
 		RETVAL = dkim_set_dns_callback(libopendkim, call_dns_callback, interval);
+	OUTPUT:
+		RETVAL
+
+DKIM_STAT
+_dkim_set_final(libopendkim, func)
+		DKIM_LIB *libopendkim
+		SV *func
+	CODE:
+		if(final_callback == (SV *)NULL)
+			final_callback = newSVsv(func);
+		else
+			SVSetSV(final_callback, func);
+
+		RETVAL = dkim_set_final(libopendkim, call_final_callback);
 	OUTPUT:
 		RETVAL
 

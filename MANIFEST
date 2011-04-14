@@ -9,11 +9,17 @@ lib/Mail/OpenDKIM.pm
 lib/Mail/OpenDKIM/DKIM.pm
 typemap
 t/00-load.t
+t/Mail-OpenDKIM.t
 t/boilerplate.t
 t/dkim_flush_cache.t
+t/dkim_get_signer.t
+t/dkim_get_user_context.t
 t/dkim_getcachestats.t
+t/dkim_libfeature.t
+t/dkim_set_dns_callback.t
+t/dkim_set_final.t
+t/dkim_ssl_version.t
 t/manifest.t
 t/pod-coverage.t
 t/pod.t
-t/dkim_ssl_version.t
 META.yml                                 Module meta-data (added by MakeMaker)
