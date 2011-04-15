@@ -7,9 +7,9 @@ BEGIN { use_ok('Mail::OpenDKIM') };
 #########################
 
 sub callback {
-	my $ctx = shift;
+	my ($dkim, $siginfo, $nsigs) = @_;
 
-	die("callback called unexpectedly, ctx $ctx");
+	die("callback called unexpectedly, nsigs $nsigs");
 }
 
 FLUSH_CACHE: {

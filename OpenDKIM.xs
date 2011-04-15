@@ -10,7 +10,7 @@
 
 static SV *dns_callback = (SV *)NULL;
 static SV *final_callback = (SV *)NULL;
-
+static SV *key_lookup_callback = (SV *)NULL;
 
 /*
  * called when the OpenDKIMlibrary wants to call the callback function provided to
@@ -62,6 +62,48 @@ call_final_callback(DKIM *dkim, DKIM_SIGINFO **sigs, int nsigs)
 
 	if(count != 1) {
 		croak("Internal error: final_callback routine returned %d items, 1 was expected",
+			count);
+		return;
+	}
+
+	status = POPi;
+
+	PUTBACK;
+	FREETMPS;
+	LEAVE;
+
+	return status;
+}
+
+/*
+ * called when the OpenDKIMlibrary wants to call the callback function provided to
+ * dkim_set_key_lookup
+ */
+static DKIM_CBSTAT
+call_key_lookup_callback(DKIM *dkim, DKIM_SIGINFO *siginfo, unsigned char *buf, size_t buflen)
+{
+	dSP;
+	int count, status;
+	SV *sv = key_lookup_callback;
+
+	if(sv == NULL) {
+		croak("Internal error: call_key_lookgup_callback called, but nothing to call");
+		return;
+	}
+
+	PUSHMARK(SP);
+	XPUSHs(sv_2mortal(newSVpv((void *)dkim, 0)));
+	XPUSHs(sv_2mortal(newSVpv((void *)siginfo, 0)));
+	XPUSHs(sv_2mortal(newSVpv((void *)buf, 0)));
+	XPUSHs(sv_2mortal(newSViv(buflen)));
+	PUTBACK;
+
+	call_sv(key_lookup_callback, G_SCALAR);
+
+	SPAGAIN;
+
+	if(count != 1) {
+		croak("Internal error: key_lookup_callback routine returned %d items, 1 was expected",
 			count);
 		return;
 	}
@@ -179,6 +221,20 @@ _dkim_set_final(libopendkim, func)
 			SVSetSV(final_callback, func);
 
 		RETVAL = dkim_set_final(libopendkim, call_final_callback);
+	OUTPUT:
+		RETVAL
+
+DKIM_STAT
+_dkim_set_key_lookup(libopendkim, func)
+		DKIM_LIB *libopendkim
+		SV *func
+	CODE:
+		if(final_callback == (SV *)NULL)
+			key_lookup_callback = newSVsv(func);
+		else
+			SVSetSV(key_lookup_callback, func);
+
+		RETVAL = dkim_set_key_lookup(libopendkim, call_key_lookup_callback);
 	OUTPUT:
 		RETVAL
 

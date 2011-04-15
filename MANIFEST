@@ -18,6 +18,7 @@ t/dkim_getcachestats.t
 t/dkim_libfeature.t
 t/dkim_set_dns_callback.t
 t/dkim_set_final.t
+t/dkim_set_key_lookup.t
 t/dkim_ssl_version.t
 t/manifest.t
 t/pod-coverage.t
