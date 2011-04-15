@@ -8,9 +8,38 @@
 
 /* h2xs -A -n Mail::OpenDKIM */
 
+/* callbacks */
 static SV *dns_callback = (SV *)NULL;
 static SV *final_callback = (SV *)NULL;
 static SV *key_lookup_callback = (SV *)NULL;
+static SV *policy_lookup_callback = (SV *)NULL;
+
+/*
+ * dkim.h doesn't specify the contents of the DKIM and DKIM_SIGINFO structures, it just
+ * declares them :-(
+ * So this is an overkill size, that SHOULD be large enough.  See dkim-types.h for more
+ * information about the structures
+ */
+
+#define	SIZEOF_DKIM		4096
+#define	SIZEOF_DKIM_SIGINFO	1024
+
+/*
+ * These routines allow us to call callbacks that are written in and supplied using Perl that
+ * are maintained and called from within the OpenDKIM library
+ *
+ * e.g.
+ * sub dns_callback {
+ *  my $context = shift;
+ *
+ *   print "DNS called back with context $context\n";
+ * }
+ *
+ * set_dns_callback({ function => \&callback, interval => 1 });
+ *
+ * These are all dummy callbacks that we pass to OpenDKIM, and when OpenDKIM calls them they
+ * call the Perl routines supplied by the caller
+ */
 
 /*
  * called when the OpenDKIMlibrary wants to call the callback function provided to
@@ -47,23 +76,23 @@ call_final_callback(DKIM *dkim, DKIM_SIGINFO **sigs, int nsigs)
 
 	if(sv == NULL) {
 		croak("Internal error: call_final_callback called, but nothing to call");
-		return;
+		return DKIM_CBSTAT_ERROR;
 	}
 
 	PUSHMARK(SP);
-	XPUSHs(sv_2mortal(newSVpv((void *)dkim, 0)));
-	XPUSHs(sv_2mortal(newSVpv((void *)sigs, 0)));
+	XPUSHs(sv_2mortal(newSVpv((void *)dkim, SIZEOF_DKIM)));
+	XPUSHs(sv_2mortal(newSVpv((void *)sigs, nsigs * SIZEOF_DKIM_SIGINFO)));
 	XPUSHs(sv_2mortal(newSViv(nsigs)));
 	PUTBACK;
 
-	call_sv(final_callback, G_SCALAR);
+	count = call_sv(final_callback, G_SCALAR);
 
 	SPAGAIN;
 
 	if(count != 1) {
 		croak("Internal error: final_callback routine returned %d items, 1 was expected",
 			count);
-		return;
+		return DKIM_CBSTAT_ERROR;
 	}
 
 	status = POPi;
@@ -87,25 +116,69 @@ call_key_lookup_callback(DKIM *dkim, DKIM_SIGINFO *siginfo, unsigned char *buf, 
 	SV *sv = key_lookup_callback;
 
 	if(sv == NULL) {
-		croak("Internal error: call_key_lookgup_callback called, but nothing to call");
-		return;
+		croak("Internal error: call_key_lookup_callback called, but nothing to call");
+		return DKIM_CBSTAT_ERROR;
 	}
 
 	PUSHMARK(SP);
-	XPUSHs(sv_2mortal(newSVpv((void *)dkim, 0)));
-	XPUSHs(sv_2mortal(newSVpv((void *)siginfo, 0)));
-	XPUSHs(sv_2mortal(newSVpv((void *)buf, 0)));
+	XPUSHs(sv_2mortal(newSVpv((void *)dkim, SIZEOF_DKIM)));
+	XPUSHs(sv_2mortal(newSVpv((void *)siginfo, SIZEOF_DKIM_SIGINFO)));
+	XPUSHs(sv_2mortal(newSVpv((void *)buf, buflen + 1)));
 	XPUSHs(sv_2mortal(newSViv(buflen)));
 	PUTBACK;
 
-	call_sv(key_lookup_callback, G_SCALAR);
+	count = call_sv(key_lookup_callback, G_SCALAR);
 
 	SPAGAIN;
 
 	if(count != 1) {
 		croak("Internal error: key_lookup_callback routine returned %d items, 1 was expected",
 			count);
-		return;
+		return DKIM_CBSTAT_ERROR;
+	}
+
+	status = POPi;
+
+	PUTBACK;
+	FREETMPS;
+	LEAVE;
+
+	return status;
+}
+
+/*
+ * called when the OpenDKIMlibrary wants to call the callback function provided to
+ * dkim_set_policy_lookup
+ */
+static DKIM_CBSTAT
+call_policy_lookup_callback(DKIM *dkim, unsigned char *query, _Bool excheck, unsigned char *buf, size_t buflen, int *qstat)
+{
+	dSP;
+	int count, status;
+	SV *sv = policy_lookup_callback;
+
+	if(sv == NULL) {
+		croak("Internal error: call_policy_lookup_callback called, but nothing to call");
+		return DKIM_CBSTAT_ERROR;
+	}
+
+	PUSHMARK(SP);
+	XPUSHs(sv_2mortal(newSVpv((void *)dkim, SIZEOF_DKIM)));
+	XPUSHs(sv_2mortal(newSVpv((void *)query, 0)));
+	XPUSHs(sv_2mortal(newSViv(excheck)));
+	XPUSHs(sv_2mortal(newSVpv((void *)buf, buflen + 1)));
+	XPUSHs(sv_2mortal(newSViv(buflen)));
+	XPUSHs(sv_2mortal(newSVpv((void *)qstat, sizeof(int))));
+	PUTBACK;
+
+	count = call_sv(policy_lookup_callback, G_SCALAR);
+
+	SPAGAIN;
+
+	if(count != 1) {
+		croak("Internal error: policy_lookup_callback routine returned %d items, 1 was expected",
+			count);
+		return DKIM_CBSTAT_ERROR;
 	}
 
 	status = POPi;
@@ -218,7 +291,7 @@ _dkim_set_final(libopendkim, func)
 		if(final_callback == (SV *)NULL)
 			final_callback = newSVsv(func);
 		else
-			SVSetSV(final_callback, func);
+			SvSetSV(final_callback, func);
 
 		RETVAL = dkim_set_final(libopendkim, call_final_callback);
 	OUTPUT:
@@ -229,12 +302,26 @@ _dkim_set_key_lookup(libopendkim, func)
 		DKIM_LIB *libopendkim
 		SV *func
 	CODE:
-		if(final_callback == (SV *)NULL)
+		if(key_lookup_callback == (SV *)NULL)
 			key_lookup_callback = newSVsv(func);
 		else
-			SVSetSV(key_lookup_callback, func);
+			SvSetSV(key_lookup_callback, func);
 
 		RETVAL = dkim_set_key_lookup(libopendkim, call_key_lookup_callback);
+	OUTPUT:
+		RETVAL
+
+DKIM_STAT
+_dkim_set_policy_lookup(libopendkim, func)
+		DKIM_LIB *libopendkim
+		SV *func
+	CODE:
+		if(policy_lookup_callback == (SV *)NULL)
+			policy_lookup_callback = newSVsv(func);
+		else
+			SvSetSV(policy_lookup_callback, func);
+
+		RETVAL = dkim_set_policy_lookup(libopendkim, call_policy_lookup_callback);
 	OUTPUT:
 		RETVAL
 
@@ -282,7 +369,7 @@ _dkim_eom(dkim)
 	OUTPUT:
 		RETVAL
 
-char *
+unsigned char *
 _dkim_get_signer(dkim)
 		DKIM *dkim
 	CODE:

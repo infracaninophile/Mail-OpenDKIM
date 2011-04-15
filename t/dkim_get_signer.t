@@ -37,6 +37,7 @@ FLUSH_CACHE: {
 
 	my $signer = $d->dkim_get_signer();
 
+diag($signer);
 	ok(!defined($signer));
 
 	# TODO: set a signer and check that it is retrievable
