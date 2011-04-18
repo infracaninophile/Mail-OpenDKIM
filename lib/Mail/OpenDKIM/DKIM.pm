@@ -166,6 +166,21 @@ sub dkim_set_final()
 	return Mail::OpenDKIM::_dkim_set_final($self->{_dkimlib_handle}, $$args{func});
 }
 
+sub dkim_set_prescreen()
+{
+	my ($self, $args) = @_;
+
+	unless($self->{_dkimlib_handle}) {
+		throw Error::Simple('dkim_set_prescreen called before dkim_sign');
+	}
+	foreach(qw(func)) {
+		exists($$args{$_}) or throw Error::Simple("dkim_set_prescreen missing argument '$_'");
+		defined($$args{$_}) or throw Error::Simple("dkim_set_prescreen undefined argument '$_'");
+	}
+
+	return Mail::OpenDKIM::_dkim_set_prescreen($self->{_dkimlib_handle}, $$args{func});
+}
+
 sub dkim_geterror
 {
 	my $self = shift;
@@ -247,6 +262,8 @@ For internal use by Mail::OpenDKIM only - do not call directly
 =head2 dkim_get_user_context
 
 =head2 dkim_set_final
+
+=head2 dkim_set_prescreen
 
 =head2 dkim_geterror
 

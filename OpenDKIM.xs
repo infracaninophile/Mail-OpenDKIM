@@ -13,6 +13,9 @@ static SV *dns_callback = (SV *)NULL;
 static SV *final_callback = (SV *)NULL;
 static SV *key_lookup_callback = (SV *)NULL;
 static SV *policy_lookup_callback = (SV *)NULL;
+static SV *prescreen_callback = (SV *)NULL;
+static SV *signature_handle_callback = (SV *)NULL;
+static SV *signature_handle_free_callback = (SV *)NULL;
 
 /*
  * dkim.h doesn't specify the contents of the DKIM and DKIM_SIGINFO structures, it just
@@ -60,7 +63,7 @@ call_dns_callback(const void *context)
 	XPUSHs(sv_2mortal(newSVpv(context, 0)));
 	PUTBACK;
 
-	call_sv(dns_callback, G_DISCARD);
+	call_sv(sv, G_DISCARD);
 }
 
 /*
@@ -85,7 +88,7 @@ call_final_callback(DKIM *dkim, DKIM_SIGINFO **sigs, int nsigs)
 	XPUSHs(sv_2mortal(newSViv(nsigs)));
 	PUTBACK;
 
-	count = call_sv(final_callback, G_SCALAR);
+	count = call_sv(sv, G_SCALAR);
 
 	SPAGAIN;
 
@@ -127,7 +130,7 @@ call_key_lookup_callback(DKIM *dkim, DKIM_SIGINFO *siginfo, unsigned char *buf, 
 	XPUSHs(sv_2mortal(newSViv(buflen)));
 	PUTBACK;
 
-	count = call_sv(key_lookup_callback, G_SCALAR);
+	count = call_sv(sv, G_SCALAR);
 
 	SPAGAIN;
 
@@ -171,7 +174,7 @@ call_policy_lookup_callback(DKIM *dkim, unsigned char *query, _Bool excheck, uns
 	XPUSHs(sv_2mortal(newSVpv((void *)qstat, sizeof(int))));
 	PUTBACK;
 
-	count = call_sv(policy_lookup_callback, G_SCALAR);
+	count = call_sv(sv, G_SCALAR);
 
 	SPAGAIN;
 
@@ -189,6 +192,113 @@ call_policy_lookup_callback(DKIM *dkim, unsigned char *query, _Bool excheck, uns
 
 	return status;
 }
+
+/*
+ * called when the OpenDKIMlibrary wants to call the callback function provided to
+ * dkim_set_prescreen
+ */
+static DKIM_CBSTAT
+call_prescreen_callback(DKIM *dkim, DKIM_SIGINFO **sigs, int nsigs)
+{
+	dSP;
+	int count, status;
+	SV *sv = prescreen_callback;
+
+	if(sv == NULL) {
+		croak("Internal error: call_prescreen_callback called, but nothing to call");
+		return DKIM_CBSTAT_ERROR;
+	}
+
+	PUSHMARK(SP);
+	XPUSHs(sv_2mortal(newSVpv((void *)dkim, SIZEOF_DKIM)));
+	XPUSHs(sv_2mortal(newSVpv((void *)sigs, nsigs * SIZEOF_DKIM_SIGINFO)));
+	XPUSHs(sv_2mortal(newSViv(nsigs)));
+	PUTBACK;
+
+	count = call_sv(sv, G_SCALAR);
+
+	SPAGAIN;
+
+	if(count != 1) {
+		croak("Internal error: prescreen_callback routine returned %d items, 1 was expected",
+			count);
+		return DKIM_CBSTAT_ERROR;
+	}
+
+	status = POPi;
+
+	PUTBACK;
+	FREETMPS;
+	LEAVE;
+
+	return status;
+}
+
+/*
+ * called when the OpenDKIMlibrary wants to call the callback function provided to
+ * dkim_set_signature_handle
+ */
+static void *
+call_signature_handle_callback(void *closure)
+{
+	dSP;
+	int count;
+	void *v;
+	SV *sv = signature_handle_callback;
+
+	if(sv == NULL) {
+		croak("Internal error: call_signature_handle_callback called, but nothing to call");
+		return NULL;
+	}
+
+	PUSHMARK(SP);
+	/* libOpenDKIM doesn't tell us the size of closure, so use best guess :-( */
+	XPUSHs(sv_2mortal(newSVpv((void *)closure, BUFSIZ)));
+	PUTBACK;
+
+	count = call_sv(sv, G_SCALAR);
+
+	SPAGAIN;
+
+	if(count != 1) {
+		croak("Internal error: signature_handle_callback routine returned %d items, 1 was expected",
+			count);
+		return NULL;
+	}
+
+	v = POPp;
+
+	PUTBACK;
+	FREETMPS;
+	LEAVE;
+
+	return v;
+}
+
+/*
+ * called when the OpenDKIMlibrary wants to call the callback function provided to
+ * dkim_set_signature_handle_free
+ */
+static void
+call_signature_handle_free_callback(void *closure, void *ptr)
+{
+	dSP;
+	SV *sv = signature_handle_free_callback;
+
+	if(sv == NULL) {
+		croak("Internal error: call_handle_free_callback called, but nothing to call");
+		return;
+	}
+
+	PUSHMARK(SP);
+	/* libOpenDKIM doesn't tell us the size of closure, so use best guess :-( */
+	XPUSHs(sv_2mortal(newSVpv((void *)closure, BUFSIZ)));
+	XPUSHs(sv_2mortal(newSVpv((void *)ptr, BUFSIZ)));
+	PUTBACK;
+
+	call_sv(sv, G_DISCARD);
+}
+
 
 MODULE = Mail::OpenDKIM		PACKAGE = Mail::OpenDKIM
 PROTOTYPES: DISABLE
@@ -312,6 +422,20 @@ _dkim_set_key_lookup(libopendkim, func)
 		RETVAL
 
 DKIM_STAT
+_dkim_set_prescreen(libopendkim, func)
+		DKIM_LIB *libopendkim
+		SV *func
+	CODE:
+		if(prescreen_callback == (SV *)NULL)
+			prescreen_callback = newSVsv(func);
+		else
+			SvSetSV(prescreen_callback, func);
+
+		RETVAL = dkim_set_prescreen(libopendkim, call_prescreen_callback);
+	OUTPUT:
+		RETVAL
+
+DKIM_STAT
 _dkim_set_policy_lookup(libopendkim, func)
 		DKIM_LIB *libopendkim
 		SV *func
@@ -322,6 +446,34 @@ _dkim_set_policy_lookup(libopendkim, func)
 			SvSetSV(policy_lookup_callback, func);
 
 		RETVAL = dkim_set_policy_lookup(libopendkim, call_policy_lookup_callback);
+	OUTPUT:
+		RETVAL
+
+DKIM_STAT
+_dkim_set_signature_handle(libopendkim, func)
+		DKIM_LIB *libopendkim
+		SV *func
+	CODE:
+		if(signature_handle_callback == (SV *)NULL)
+			signature_handle_callback = newSVsv(func);
+		else
+			SvSetSV(signature_handle_callback, func);
+
+		RETVAL = dkim_set_signature_handle(libopendkim, call_signature_handle_callback);
+	OUTPUT:
+		RETVAL
+
+DKIM_STAT
+_dkim_set_signature_handle_free(libopendkim, func)
+		DKIM_LIB *libopendkim
+		SV *func
+	CODE:
+		if(signature_handle_free_callback == (SV *)NULL)
+			signature_handle_free_callback = newSVsv(func);
+		else
+			SvSetSV(signature_handle_free_callback, func);
+
+		RETVAL = dkim_set_signature_handle_free(libopendkim, call_signature_handle_free_callback);
 	OUTPUT:
 		RETVAL
 
