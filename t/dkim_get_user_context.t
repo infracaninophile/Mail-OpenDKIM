@@ -1,12 +1,12 @@
 #!/usr/bin/perl -wT
 
-use Test::More tests => 6;
+use Test::More tests => 7;
 use Error qw(:try);
 BEGIN { use_ok('Mail::OpenDKIM') };
 
 #########################
 
-FLUSH_CACHE: {
+GET_USER_CONTEXT: {
 
 	my $o = new_ok('Mail::OpenDKIM');
 	ok($o->dkim_init());
@@ -39,9 +39,7 @@ FLUSH_CACHE: {
 
 	ok(!defined($ctx));
 
-	# TODO: set a context and check that it is retrievable
-
-	$d->dkim_free();
+	ok($d->dkim_free() == DKIM_STAT_OK);
 
 	$o->dkim_close();
 }

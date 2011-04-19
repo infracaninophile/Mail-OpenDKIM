@@ -216,11 +216,11 @@ sub dkim_set_signature_handle()
 	my ($self, $args) = @_;
 
 	unless($self->{_dkimlib_handle}) {
-		throw Error::Simple('dkim_set_signture_handle called before dkim_sign');
+		throw Error::Simple('dkim_set_signature_handle called before dkim_sign');
 	}
 	foreach(qw(func)) {
-		exists($$args{$_}) or throw Error::Simple("dkim_set_signture_handle missing argument '$_'");
-		defined($$args{$_}) or throw Error::Simple("dkim_set_signture_handle undefined argument '$_'");
+		exists($$args{$_}) or throw Error::Simple("dkim_set_signature_handle missing argument '$_'");
+		defined($$args{$_}) or throw Error::Simple("dkim_set_signature_handle undefined argument '$_'");
 	}
 
 	return _dkim_set_signature_handle($self->{_dkimlib_handle}, $$args{func});
@@ -231,14 +231,29 @@ sub dkim_set_signature_handle_free()
 	my ($self, $args) = @_;
 
 	unless($self->{_dkimlib_handle}) {
-		throw Error::Simple('dkim_set_signture_handle_free called before dkim_sign');
+		throw Error::Simple('dkim_set_signature_handle_free called before dkim_sign');
 	}
 	foreach(qw(func)) {
-		exists($$args{$_}) or throw Error::Simple("dkim_set_signture_handle_free missing argument '$_'");
-		defined($$args{$_}) or throw Error::Simple("dkim_set_signture_handle_free undefined argument '$_'");
+		exists($$args{$_}) or throw Error::Simple("dkim_set_signature_handle_free missing argument '$_'");
+		defined($$args{$_}) or throw Error::Simple("dkim_set_signature_handle_free undefined argument '$_'");
 	}
 
 	return _dkim_set_signature_handle_free($self->{_dkimlib_handle}, $$args{func});
+}
+
+sub dkim_set_signature_tagvalues()
+{
+	my ($self, $args) = @_;
+
+	unless($self->{_dkimlib_handle}) {
+		throw Error::Simple('dkim_set_signature_tagvalues called before dkim_sign');
+	}
+	foreach(qw(func)) {
+		exists($$args{$_}) or throw Error::Simple("dkim_set_signature_tagvalues missing argument '$_'");
+		defined($$args{$_}) or throw Error::Simple("dkim_set_signature_tagvalues undefined argument '$_'");
+	}
+
+	return _dkim_set_signature_tagvalues($self->{_dkimlib_handle}, $$args{func});
 }
 
 sub DESTROY
@@ -309,6 +324,8 @@ Static method.
 =head2 dkim_set_signature_handle
 
 =head2 dkim_set_signature_handle_free
+
+=head2 dkim_set_signature_tagvalues
 
 =head2 EXPORT
 

@@ -1,12 +1,12 @@
 #!/usr/bin/perl -wT
 
-use Test::More tests => 6;
+use Test::More tests => 9;
 use Error qw(:try);
 BEGIN { use_ok('Mail::OpenDKIM') };
 
 #########################
 
-FLUSH_CACHE: {
+DKIM_SET_SIGNER: {
 
 	my $o = new_ok('Mail::OpenDKIM');
 	ok($o->dkim_init());
@@ -35,11 +35,14 @@ FLUSH_CACHE: {
 
 	isa_ok($d, 'Mail::OpenDKIM::DKIM');
 
+	ok($d->dkim_set_signer({ signer => '123' }) == DKIM_STAT_OK);
+
 	my $signer = $d->dkim_get_signer();
 
-	ok(!defined($signer));
+	ok(defined($signer));
+	ok($signer eq '123');
 
-	$d->dkim_free();
+	ok($d->dkim_free() == DKIM_STAT_OK);
 
 	$o->dkim_close();
 }

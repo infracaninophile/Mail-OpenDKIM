@@ -16,6 +16,7 @@ static SV *policy_lookup_callback = (SV *)NULL;
 static SV *prescreen_callback = (SV *)NULL;
 static SV *signature_handle_callback = (SV *)NULL;
 static SV *signature_handle_free_callback = (SV *)NULL;
+static SV *signature_tagvalues_callback = (SV *)NULL;
 
 /*
  * dkim.h doesn't specify the contents of the DKIM and DKIM_SIGINFO structures, it just
@@ -299,6 +300,31 @@ call_signature_handle_free_callback(void *closure, void *ptr)
 	call_sv(sv, G_DISCARD);
 }
 
+/*
+ * called when the OpenDKIMlibrary wants to call the callback function provided to
+ * dkim_set_signature_tagvalues
+ */
+static void
+call_signature_tagvalues_callback(void *user, dkim_param_t pcode, const unsigned char *param, const unsigned char *value)
+{
+	dSP;
+	SV *sv = signature_tagvalues_callback;
+
+	if(sv == NULL) {
+		croak("Internal error: call_signature_tagvalues_callback called, but nothing to call");
+		return;
+	}
+
+	PUSHMARK(SP);
+	/* libOpenDKIM doesn't tell us the size of user, so use best guess :-( */
+	XPUSHs(sv_2mortal(newSVpv((void *)user, BUFSIZ)));
+	XPUSHs(sv_2mortal(newSViv(pcode)));
+	XPUSHs(sv_2mortal(newSVpv(param, 0)));
+	XPUSHs(sv_2mortal(newSVpv(value, 0)));
+	PUTBACK;
+
+	call_sv(sv, G_DISCARD);
+}
 
 MODULE = Mail::OpenDKIM		PACKAGE = Mail::OpenDKIM
 PROTOTYPES: DISABLE
@@ -375,8 +401,8 @@ _dkim_sign(libhandle, id, secretkey, selector, domain, hdrcanon_alg, bodycanon_a
 	CODE:
 		RETVAL = dkim_sign(libhandle, (const unsigned char *)id, NULL, (dkim_sigkey_t)secretkey, (const unsigned char *)selector, (const unsigned char *)domain, hdrcanon_alg, bodycanon_alg, sign_alg, length, &statp);
 	OUTPUT:
-		RETVAL
 		statp
+		RETVAL
 
 DKIM_STAT
 _dkim_set_dns_callback(libopendkim, func, interval)
@@ -478,6 +504,20 @@ _dkim_set_signature_handle_free(libopendkim, func)
 		RETVAL
 
 DKIM_STAT
+_dkim_set_signature_tagvalues(libopendkim, func)
+		DKIM_LIB *libopendkim
+		SV *func
+	CODE:
+		if(signature_tagvalues_callback == (SV *)NULL)
+			signature_tagvalues_callback = newSVsv(func);
+		else
+			SvSetSV(signature_tagvalues_callback, func);
+
+		RETVAL = dkim_set_signature_tagvalues(libopendkim, call_signature_tagvalues_callback);
+	OUTPUT:
+		RETVAL
+
+DKIM_STAT
 _dkim_free(d)
 		DKIM *d
 	CODE:
@@ -529,11 +569,29 @@ _dkim_get_signer(dkim)
 	OUTPUT:
 		RETVAL
 
-const void *
+DKIM_STAT
+_dkim_set_signer(dkim, signer)
+		DKIM *dkim
+		const char *signer
+	CODE:
+		RETVAL = dkim_set_signer(dkim, signer);
+	OUTPUT:
+		RETVAL
+
+void *
 _dkim_get_user_context(dkim)
 		DKIM *dkim
 	CODE:
 		RETVAL = dkim_get_user_context(dkim);
+	OUTPUT:
+		RETVAL
+
+DKIM_STAT
+_dkim_set_user_context(dkim, ctx)
+		DKIM *dkim
+		const void *ctx
+	CODE:
+		RETVAL = dkim_set_user_context(dkim, ctx);
 	OUTPUT:
 		RETVAL
 

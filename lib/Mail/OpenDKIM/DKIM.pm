@@ -138,6 +138,21 @@ sub dkim_get_signer
 	return Mail::OpenDKIM::_dkim_get_signer($self->{_dkim_handle});
 }
 
+sub dkim_set_signer
+{
+	my ($self, $args) = @_;
+
+	unless($self->{_dkim_handle}) {
+		throw Error::Simple('dkim_set_signer called before dkim_sign');
+	}
+	foreach(qw(signer)) {
+		exists($$args{$_}) or throw Error::Simple("dkim_set_signer missing argument '$_'");
+		defined($$args{$_}) or throw Error::Simple("dkim_set_signer undefined argument '$_'");
+	}
+
+	return Mail::OpenDKIM::_dkim_set_signer($self->{_dkim_handle}, $$args{signer});
+}
+
 sub dkim_get_user_context
 {
 	my $self = shift;
@@ -146,9 +161,22 @@ sub dkim_get_user_context
 		throw Error::Simple('dkim_get_user_context called before dkim_sign');
 	}
 
-	my $rc = Mail::OpenDKIM::_dkim_get_user_context($self->{_dkim_handle});
+	return Mail::OpenDKIM::_dkim_get_user_context($self->{_dkim_handle});
+}
 
-	return ($rc == 0) ? undef : $rc;
+sub dkim_set_user_context
+{
+	my ($self, $args) = @_;
+
+	unless($self->{_dkim_handle}) {
+		throw Error::Simple('dkim_set_user_context called before dkim_sign');
+	}
+	foreach(qw(context)) {
+		exists($$args{$_}) or throw Error::Simple("dkim_set_final missing argument '$_'");
+		defined($$args{$_}) or throw Error::Simple("dkim_set_final undefined argument '$_'");
+	}
+
+	return Mail::OpenDKIM::_dkim_set_user_context($self->{_dkim_handle}, $$args{context});
 }
 
 sub dkim_set_final()
@@ -259,7 +287,11 @@ For internal use by Mail::OpenDKIM only - do not call directly
 
 =head2 dkim_get_signer
 
+=head2 dkim_set_signer
+
 =head2 dkim_get_user_context
+
+=head2 dkim_set_user_context
 
 =head2 dkim_set_final
 
