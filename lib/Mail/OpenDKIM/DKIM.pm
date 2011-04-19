@@ -53,12 +53,33 @@ sub dkim_sign
 	return $statp;
 }
 
+sub dkim_verify
+{
+	my ($self, $args) = @_;
+
+	if($self->{_dkim_handle}) {
+		throw Error::Simple('dkim_verify called twice');
+	}
+
+	foreach(qw(id)) {
+		exists($$args{$_}) or throw Error::Simple("dkim_verify missing argument '$_'");
+		defined($$args{$_}) or throw Error::Simple("dkim_verify undefined argument '$_'");
+	}
+
+	my $statp;
+
+	$self->{_dkim_handle} = Mail::OpenDKIM::_dkim_verify($self->{_dkimlib_handle},
+		$$args{id}, $statp);
+
+	return $statp;
+}
+
 sub dkim_header
 {
 	my ($self, $args) = @_;
 
 	unless($self->{_dkim_handle}) {
-		throw Error::Simple('dkim_header called before dkim_sign');
+		throw Error::Simple('dkim_header called before dkim_sign/dkim_verify');
 	}
 	foreach(qw(header len)) {
 		exists($$args{$_}) or throw Error::Simple("dkim_header missing argument '$_'");
@@ -73,7 +94,7 @@ sub dkim_eoh
 	my $self = shift;
 
 	unless($self->{_dkim_handle}) {
-		throw Error::Simple('dkim_eoh called before dkim_sign');
+		throw Error::Simple('dkim_eoh called before dkim_sign/dkim_verify');
 	}
 
 	return Mail::OpenDKIM::_dkim_eoh($self->{_dkim_handle});
@@ -84,7 +105,7 @@ sub dkim_chunk
 	my ($self, $args) = @_;
 
 	unless($self->{_dkim_handle}) {
-		throw Error::Simple('dkim_chunk called before dkim_sign');
+		throw Error::Simple('dkim_chunk called before dkim_sign/dkim_verify');
 	}
 	foreach(qw(chunkp len)) {
 		exists($$args{$_}) or throw Error::Simple("dkim_chunk missing argument '$_'");
@@ -99,10 +120,24 @@ sub dkim_eom
 	my $self = shift;
 
 	unless($self->{_dkim_handle}) {
-		throw Error::Simple('dkim_eom called before dkim_sign');
+		throw Error::Simple('dkim_eom called before dkim_sign/dkim_verify');
 	}
 
 	return Mail::OpenDKIM::_dkim_eom($self->{_dkim_handle});
+}
+
+sub dkim_getsighdr
+{
+	my ($self, $args) = @_;
+
+	unless($self->{_dkim_handle}) {
+		throw Error::Simple('dkim_getsighdr called before dkim_sign');
+	}
+	foreach(qw(initial buf len)) {
+		exists($$args{$_}) or throw Error::Simple("dkim_getsighdr missing argument '$_'");
+	}
+
+	return Mail::OpenDKIM::_dkim_getsighdr($self->{_dkim_handle}, $$args{buf}, $$args{len}, $$args{initial});
 }
 
 sub dkim_getsighdr_d
@@ -122,6 +157,29 @@ sub dkim_getsighdr_d
 
 	if($rc == DKIM_STAT_OK) {
 		$$args{len} = $len;
+	}
+
+	return $rc;
+}
+
+sub dkim_getsiglist
+{
+	my ($self, $args) = @_;
+
+	unless($self->{_dkim_handle}) {
+		throw Error::Simple('dkim_getsiglist called before dkim_sign/dkim_verify');
+	}
+	foreach(qw(sigs nsigs)) {
+		exists($$args{$_}) or throw Error::Simple("dkim_getsiglist missing argument '$_'");
+	}
+
+	my($rc, $nsigs, @sigs) = Mail::OpenDKIM::_dkim_getsiglist($self->{_dkim_handle});
+
+	if($rc == DKIM_STAT_OK) {
+		$$args{nsigs} = $nsigs;
+		$$args{sigs} = \@sigs;
+	} else {
+		$$args{nsigs} = undef;
 	}
 
 	return $rc;
@@ -153,6 +211,21 @@ sub dkim_set_signer
 	return Mail::OpenDKIM::_dkim_set_signer($self->{_dkim_handle}, $$args{signer});
 }
 
+sub dkim_set_margin
+{
+	my ($self, $args) = @_;
+
+	unless($self->{_dkim_handle}) {
+		throw Error::Simple('dkim_set_margin called before dkim_sign');
+	}
+	foreach(qw(margin)) {
+		exists($$args{$_}) or throw Error::Simple("dkim_set_margin missing argument '$_'");
+		defined($$args{$_}) or throw Error::Simple("dkim_set_margin undefined argument '$_'");
+	}
+
+	return Mail::OpenDKIM::_dkim_set_margin($self->{_dkim_handle}, $$args{margin});
+}
+
 sub dkim_get_user_context
 {
 	my $self = shift;
@@ -177,6 +250,32 @@ sub dkim_set_user_context
 	}
 
 	return Mail::OpenDKIM::_dkim_set_user_context($self->{_dkim_handle}, $$args{context});
+}
+
+sub dkim_atps_check
+{
+	my ($self, $args) = @_;
+
+	unless($self->{_dkim_handle}) {
+		throw Error::Simple('dkim_atps_check called before dkim_verify');
+	}
+	foreach(qw(sig)) {
+		exists($$args{$_}) or throw Error::Simple("dkim_set_final missing argument '$_'");
+		defined($$args{$_}) or throw Error::Simple("dkim_set_final undefined argument '$_'");
+	}
+	foreach(qw(res timeout)) {
+		exists($$args{$_}) or throw Error::Simple("dkim_set_final missing argument '$_'");
+	}
+
+	my $res;
+
+	my $rc = Mail::OpenDKIM::_dkim_atps_check($self->{_dkim_handle}, $$args{sig}, $$args{timeout} ? $$args{timeout} : 0, $res);
+
+	if($rc == DKIM_STAT_OK) {
+		$$args{res} = $res;
+	}
+
+	return $rc;
 }
 
 sub dkim_set_final()
@@ -207,6 +306,32 @@ sub dkim_set_prescreen()
 	}
 
 	return Mail::OpenDKIM::_dkim_set_prescreen($self->{_dkimlib_handle}, $$args{func});
+}
+
+sub dkim_getpartial
+{
+	my $self = shift;
+
+	unless($self->{_dkim_handle}) {
+		throw Error::Simple('dkim_getpartial called before dkim_sign');
+	}
+
+	return Mail::OpenDKIM::_dkim_getpartial($self->{_dkim_handle});
+}
+
+sub dkim_setpartial()
+{
+	my ($self, $args) = @_;
+
+	unless($self->{_dkim_handle}) {
+		throw Error::Simple('dkim_setpartial called before dkim_sign');
+	}
+	foreach(qw(value)) {
+		exists($$args{$_}) or throw Error::Simple("dkim_setpartial missing argument '$_'");
+		defined($$args{$_}) or throw Error::Simple("dkim_setpartial undefined argument '$_'");
+	}
+
+	return Mail::OpenDKIM::_dkim_setpartial($self->{_dkim_handle}, $$args{value});
 }
 
 sub dkim_geterror
@@ -275,6 +400,8 @@ For internal use by Mail::OpenDKIM only - do not call directly
 
 =head2 dkim_sign
 
+=head2 dkim_verify
+
 =head2 dkim_header
 
 =head2 dkim_eoh
@@ -283,19 +410,31 @@ For internal use by Mail::OpenDKIM only - do not call directly
 
 =head2 dkim_eom
 
+=head2 dkim_getsighdr
+
 =head2 dkim_getsighdr_d
+
+=head2 dkim_getsiglist
 
 =head2 dkim_get_signer
 
 =head2 dkim_set_signer
 
+=head2 dkim_set_margin
+
 =head2 dkim_get_user_context
 
 =head2 dkim_set_user_context
 
+=head2 dkim_atps_check
+
 =head2 dkim_set_final
 
 =head2 dkim_set_prescreen
+
+=head2 dkim_getpartial
+
+=head2 dkim_setpartial
 
 =head2 dkim_geterror
 

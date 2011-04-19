@@ -3,9 +3,13 @@ DKIM_LIB *	T_PTR
 DKIM *		T_PTR
 DKIM_STAT	T_INT
 DKIM_STAT *	T_PTR
+DKIM_SIGINFO *	T_PTROBJ
+DKIM_SIGINFO **	T_PTR
 dkim_canon_t	T_ENUM
 dkim_alg_t	T_ENUM
 dkim_param_t	T_ENUM
+dkim_atps_t	T_INT
+struct timeval *	T_PTR
 off_t		T_LONG
 const void *	T_PV
 void *		T_PV

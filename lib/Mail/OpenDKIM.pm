@@ -159,6 +159,30 @@ sub dkim_sign
 	return $dkim;
 }
 
+sub dkim_verify
+{
+	my ($self, $args) = @_;
+
+	unless($self->{_dkimlib_handle}) {
+		throw Error::Simple('dkim_verify called before dkim_init');
+	}
+	foreach(qw(id)) {
+		exists($$args{$_}) or throw Error::Simple("dkim_verify missing argument '$_'");
+		defined($$args{$_}) or throw Error::Simple("dkim_verify undefined argument '$_'");
+	}
+	require Mail::OpenDKIM::DKIM;
+
+	my $dkim = Mail::OpenDKIM::DKIM->new({ dkimlib_handle => $self->{_dkimlib_handle} });
+
+	my $statp = $dkim->dkim_verify($args);
+
+	unless($statp == DKIM_STAT_OK) {
+		throw Error::Simple("dkim_verify failed with status $statp");
+	}
+
+	return $dkim;
+}
+
 sub dkim_getcachestats
 {
 	my ($self, $args) = @_;
@@ -186,7 +210,7 @@ sub dkim_set_key_lookup()
 	my ($self, $args) = @_;
 
 	unless($self->{_dkimlib_handle}) {
-		throw Error::Simple('dkim_set_key_lookup called before dkim_sign');
+		throw Error::Simple('dkim_set_key_lookup called before dkim_sign/dkim_verify');
 	}
 	foreach(qw(func)) {
 		exists($$args{$_}) or throw Error::Simple("dkim_set_key_lookup missing argument '$_'");
@@ -201,7 +225,7 @@ sub dkim_set_policy_lookup()
 	my ($self, $args) = @_;
 
 	unless($self->{_dkimlib_handle}) {
-		throw Error::Simple('dkim_set_policy_lookup called before dkim_sign');
+		throw Error::Simple('dkim_set_policy_lookup called before dkim_sign/dkim_verify');
 	}
 	foreach(qw(func)) {
 		exists($$args{$_}) or throw Error::Simple("dkim_set_policy_lookup missing argument '$_'");
@@ -216,7 +240,7 @@ sub dkim_set_signature_handle()
 	my ($self, $args) = @_;
 
 	unless($self->{_dkimlib_handle}) {
-		throw Error::Simple('dkim_set_signature_handle called before dkim_sign');
+		throw Error::Simple('dkim_set_signature_handle called before dkim_sign/dkim_verify');
 	}
 	foreach(qw(func)) {
 		exists($$args{$_}) or throw Error::Simple("dkim_set_signature_handle missing argument '$_'");
@@ -231,7 +255,7 @@ sub dkim_set_signature_handle_free()
 	my ($self, $args) = @_;
 
 	unless($self->{_dkimlib_handle}) {
-		throw Error::Simple('dkim_set_signature_handle_free called before dkim_sign');
+		throw Error::Simple('dkim_set_signature_handle_free called before dkim_sign/dkim_verify');
 	}
 	foreach(qw(func)) {
 		exists($$args{$_}) or throw Error::Simple("dkim_set_signature_handle_free missing argument '$_'");
@@ -246,7 +270,7 @@ sub dkim_set_signature_tagvalues()
 	my ($self, $args) = @_;
 
 	unless($self->{_dkimlib_handle}) {
-		throw Error::Simple('dkim_set_signature_tagvalues called before dkim_sign');
+		throw Error::Simple('dkim_set_signature_tagvalues called before dkim_sign/dkim_verify');
 	}
 	foreach(qw(func)) {
 		exists($$args{$_}) or throw Error::Simple("dkim_set_signature_tagvalues missing argument '$_'");
@@ -301,7 +325,12 @@ Blah blah blah.
 
 =head2 dkim_sign
 
-Returns an Mail::OpenDKIM::DKIM object
+Returns a Mail::OpenDKIM::DKIM object.
+
+=head2 dkim_verify
+
+Returns a Mail::OpenDKIM::DKIM object.
+The memclosure argument is ignored.
 
 =head2 dkim_ssl_version
 

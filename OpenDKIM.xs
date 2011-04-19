@@ -24,7 +24,6 @@ static SV *signature_tagvalues_callback = (SV *)NULL;
  * So this is an overkill size, that SHOULD be large enough.  See dkim-types.h for more
  * information about the structures
  */
-
 #define	SIZEOF_DKIM		4096
 #define	SIZEOF_DKIM_SIGINFO	1024
 
@@ -404,6 +403,18 @@ _dkim_sign(libhandle, id, secretkey, selector, domain, hdrcanon_alg, bodycanon_a
 		statp
 		RETVAL
 
+# TODO: memclosure, if that's ever needed
+DKIM *
+_dkim_verify(libhandle, id,  statp)
+		DKIM_LIB *libhandle
+		const char *id
+		DKIM_STAT statp = NO_INIT
+	CODE:
+		RETVAL = dkim_verify(libhandle, id, NULL, &statp);
+	OUTPUT:
+		statp
+		RETVAL
+
 DKIM_STAT
 _dkim_set_dns_callback(libopendkim, func, interval)
 		DKIM_LIB *libopendkim
@@ -578,6 +589,15 @@ _dkim_set_signer(dkim, signer)
 	OUTPUT:
 		RETVAL
 
+DKIM_STAT
+_dkim_set_margin(dkim, margin)
+		DKIM *dkim
+		int margin
+	CODE:
+		RETVAL = dkim_set_margin(dkim, margin);
+	OUTPUT:
+		RETVAL
+
 void *
 _dkim_get_user_context(dkim)
 		DKIM *dkim
@@ -596,6 +616,30 @@ _dkim_set_user_context(dkim, ctx)
 		RETVAL
 
 DKIM_STAT
+_dkim_atps_check(dkim, sig, timeout, res)
+		DKIM *dkim
+		void *sig
+		struct timeval *timeout
+		dkim_atps_t res = NO_INIT;
+	CODE:
+		RETVAL = dkim_atps_check(dkim, (DKIM_SIGINFO *)sig, timeout, &res);
+	OUTPUT:
+		res
+		RETVAL
+
+DKIM_STAT
+_dkim_getsighdr(dkim, buf, len, initial)
+		DKIM *dkim
+		unsigned char *buf
+		size_t len
+		size_t initial
+	CODE:
+		RETVAL = dkim_getsighdr(dkim, buf, len, initial);
+	OUTPUT:
+		buf
+		RETVAL
+
+DKIM_STAT
 _dkim_getsighdr_d(dkim, initial, buf, len)
 		DKIM *dkim
 		size_t initial
@@ -606,6 +650,52 @@ _dkim_getsighdr_d(dkim, initial, buf, len)
 	OUTPUT:
 		buf
 		len
+		RETVAL
+
+# Returns 3 values: $rc, $nsigs, @sigs
+void
+_dkim_getsiglist(dkim)
+		DKIM *dkim
+	PPCODE:
+		DKIM_SIGINFO **s = NULL;
+		int nsigs;
+		DKIM_STAT rc = dkim_getsiglist(dkim, &s, &nsigs);
+
+		/*
+		 * Push the sigs on to the stack so that they appear to Perl as a @list
+		 */
+		XPUSHs(sv_2mortal(newSViv(rc)));
+		if(rc == DKIM_STAT_OK) {
+			int i;
+
+			XPUSHs(sv_2mortal(newSViv(nsigs)));
+
+			for(i = 0; i < nsigs; i++, s++)
+				XPUSHs(sv_2mortal(newSVpv((char *)*s, SIZEOF_DKIM_SIGINFO)));
+
+			XSRETURN(i + 2);
+
+		} else {
+			XPUSHs(sv_2mortal(newSViv(0)));
+
+			XSRETURN(2);
+		}
+
+_Bool
+_dkim_getpartial(dkim)
+		DKIM *dkim
+	CODE:
+		RETVAL = dkim_getpartial(dkim);
+	OUTPUT:
+		RETVAL
+
+DKIM_STAT
+_dkim_setpartial(dkim, value)
+		DKIM *dkim
+		_Bool value
+	CODE:
+		RETVAL = dkim_setpartial(dkim, value);
+	OUTPUT:
 		RETVAL
 
 const char *
