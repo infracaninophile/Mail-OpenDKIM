@@ -89,6 +89,21 @@ sub dkim_header
 	return Mail::OpenDKIM::_dkim_header($self->{_dkim_handle}, $$args{header}, $$args{len});
 }
 
+sub dkim_body
+{
+	my ($self, $args) = @_;
+
+	unless($self->{_dkim_handle}) {
+		throw Error::Simple('dkim_body called before dkim_sign/dkim_verify');
+	}
+	foreach(qw(bodyp len)) {
+		exists($$args{$_}) or throw Error::Simple("dkim_body missing argument '$_'");
+		defined($$args{$_}) or throw Error::Simple("dkim_body undefined argument '$_'");
+	}
+
+	return Mail::OpenDKIM::_dkim_body($self->{_dkim_handle}, $$args{bodyp}, $$args{len});
+}
+
 sub dkim_eoh
 {
 	my $self = shift;
@@ -185,6 +200,30 @@ sub dkim_getsiglist
 	return $rc;
 }
 
+sub dkim_ohdrs
+{
+	my ($self, $args) = @_;
+
+	unless($self->{_dkim_handle}) {
+		throw Error::Simple('dkim_ohdrs called before dkim_verify');
+	}
+	foreach(qw(sig ptrs cnt)) {
+		exists($$args{$_}) or throw Error::Simple("dkim_ohdrs missing argument '$_'");
+		defined($$args{$_}) or throw Error::Simple("dkim_ohdrs missing argument '$_'");
+	}
+
+	my $cnt = $$args{cnt};
+
+	my $rc = Mail::OpenDKIM::_dkim_ohdrs($self->{_dkim_handle}, $$args{sig}, $$args{ptrs}, $cnt);
+	if($rc == DKIM_STAT_OK) {
+		$$args{cnt} = $cnt;
+	} else {
+		$$args{cnt} = undef;
+	}
+
+	return $rc;
+}
+
 sub dkim_get_signer
 {
 	my $self = shift;
@@ -273,6 +312,61 @@ sub dkim_atps_check
 
 	if($rc == DKIM_STAT_OK) {
 		$$args{res} = $res;
+	} else {
+		$$args{res} = undef;
+	}
+
+	return $rc;
+}
+
+sub dkim_diffheaders
+{
+	my ($self, $args) = @_;
+
+	unless($self->{_dkim_handle}) {
+		throw Error::Simple('dkim_diffheaders called before dkim_verify');
+	}
+	foreach(qw(canon maxcost ohdrs nohdrs)) {
+		exists($$args{$_}) or throw Error::Simple("dkim_diffheaders missing argument '$_'");
+		defined($$args{$_}) or throw Error::Simple("dkim_diffheaders undefined argument '$_'");
+	}
+
+	my $nout;
+	my $out;
+
+	my $rc = Mail::OpenDKIM::_dkim_diffheaders($self->{_dkim_handle}, $$args{canon}, $$args{maxcost}, $$args{ohdrs}, $$args{hdrs}, $out, $nout);
+
+	if($rc == DKIM_STAT_OK) {
+		$$args{out} = $out;
+		$$args{nout} = $nout;
+	} else {
+		$$args{out} = undef;
+		$$args{nout} = undef;
+	}
+
+	return $rc;
+}
+
+sub dkim_get_reputation
+{
+	my ($self, $args) = @_;
+
+	unless($self->{_dkim_handle}) {
+		throw Error::Simple('dkim_get_reputation called before dkim_verify');
+	}
+	foreach(qw(sig qroot)) {
+		exists($$args{$_}) or throw Error::Simple("dkim_get_reputation missing argument '$_'");
+		defined($$args{$_}) or throw Error::Simple("dkim_get_reputation undefined argument '$_'");
+	}
+
+	my $rep;
+
+	my $rc = Mail::OpenDKIM::_dkim_get_reputation($self->{_dkim_handle}, $$args{sig}, $$args{qroot}, $rep);
+
+	if($rc == DKIM_STAT_OK) {
+		$$args{rep} = $rep;
+	} else {
+		$$args{rep} = undef;
 	}
 
 	return $rc;
@@ -334,11 +428,34 @@ sub dkim_setpartial()
 	return Mail::OpenDKIM::_dkim_setpartial($self->{_dkim_handle}, $$args{value});
 }
 
+sub dkim_getdomain
+{
+	my $self = shift;
+
+	unless($self->{_dkim_handle}) {
+		throw Error::Simple('dkim_getdomain called before dkim_sign/dkim_verify');
+	}
+
+	return Mail::OpenDKIM::_dkim_getdomain($self->{_dkim_handle});
+}
+
+sub dkim_getmode
+{
+	my $self = shift;
+
+	unless($self->{_dkim_handle}) {
+		throw Error::Simple('dkim_getmode called before dkim_sign/dkim_verify');
+	}
+
+	return Mail::OpenDKIM::_dkim_getmode($self->{_dkim_handle});
+}
+
 sub dkim_geterror
 {
 	my $self = shift;
+
 	unless($self->{_dkim_handle}) {
-		throw Error::Simple('dkim_geterror called before dkim_sign');
+		throw Error::Simple('dkim_geterror called before dkim_sign/dkim_verify');
 	}
 
 	return Mail::OpenDKIM::_dkim_geterror($self->{_dkim_handle});
@@ -404,6 +521,8 @@ For internal use by Mail::OpenDKIM only - do not call directly
 
 =head2 dkim_header
 
+=head2 dkim_body
+
 =head2 dkim_eoh
 
 =head2 dkim_chunk
@@ -428,6 +547,10 @@ For internal use by Mail::OpenDKIM only - do not call directly
 
 =head2 dkim_atps_check
 
+=head2 dkim_diffheaders
+
+=head2 dkim_get_reputation
+
 =head2 dkim_set_final
 
 =head2 dkim_set_prescreen
@@ -435,6 +558,10 @@ For internal use by Mail::OpenDKIM only - do not call directly
 =head2 dkim_getpartial
 
 =head2 dkim_setpartial
+
+=head2 dkim_getdomain
+
+=head2 dkim_getmode
 
 =head2 dkim_geterror
 

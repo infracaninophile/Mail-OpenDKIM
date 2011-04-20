@@ -342,6 +342,14 @@ dkim_libversion()
 	OUTPUT:
 		RETVAL
 
+const char *
+dkim_getpolicystr(policy)
+		dkim_policy_t policy
+	CODE:
+		RETVAL = dkim_getpolicystr(policy);
+	OUTPUT:
+		RETVAL
+
 DKIM_LIB *
 _dkim_init()
 	CODE:
@@ -547,6 +555,16 @@ _dkim_header(dkim, header, len)
 		RETVAL
 
 DKIM_STAT
+_dkim_body(dkim, bodyp, len)
+		DKIM *dkim
+		unsigned char *bodyp
+		size_t len
+	CODE:
+		RETVAL = dkim_body(dkim, bodyp, len);
+	OUTPUT:
+		RETVAL
+
+DKIM_STAT
 _dkim_eoh(dkim)
 		DKIM *dkim
 	CODE:
@@ -618,13 +636,41 @@ _dkim_set_user_context(dkim, ctx)
 DKIM_STAT
 _dkim_atps_check(dkim, sig, timeout, res)
 		DKIM *dkim
-		void *sig
+		DKIM_SIGINFO *sig
 		struct timeval *timeout
 		dkim_atps_t res = NO_INIT;
 	CODE:
-		RETVAL = dkim_atps_check(dkim, (DKIM_SIGINFO *)sig, timeout, &res);
+		RETVAL = dkim_atps_check(dkim, sig, timeout, &res);
 	OUTPUT:
 		res
+		RETVAL
+
+DKIM_STAT
+_dkim_diffheaders(dkim, canon, maxcost, ohdrs, nohdrs, out, nout)
+		DKIM *dkim
+		dkim_canon_t canon
+		int maxcost
+		char **ohdrs
+		int nohdrs
+		struct dkim_hdrdiff *out = NO_INIT
+		int nout = NO_INIT
+	CODE:
+		RETVAL = dkim_diffheaders(dkim, canon, maxcost, ohdrs, nohdrs, &out, &nout);
+	OUTPUT:
+		out
+		nout
+		RETVAL
+
+DKIM_STAT
+_dkim_get_reputation(dkim, sig, qroot, rep)
+		DKIM *dkim
+		DKIM_SIGINFO *sig
+		char *qroot
+		int rep = NO_INIT
+	CODE:
+		RETVAL = dkim_get_reputation(dkim, sig, qroot, &rep);
+	OUTPUT:
+		rep
 		RETVAL
 
 DKIM_STAT
@@ -671,15 +717,27 @@ _dkim_getsiglist(dkim)
 			XPUSHs(sv_2mortal(newSViv(nsigs)));
 
 			for(i = 0; i < nsigs; i++, s++)
-				XPUSHs(sv_2mortal(newSVpv((char *)*s, SIZEOF_DKIM_SIGINFO)));
+				XPUSHs(sv_2mortal(newSVpv((char *)*s, sizeof(DKIM_SIGINFO *))));
 
-			XSRETURN(i + 2);
-
+			XSRETURN(i + 2);	/* number of items put on the stack */
 		} else {
 			XPUSHs(sv_2mortal(newSViv(0)));
 
 			XSRETURN(2);
 		}
+
+DKIM_STAT
+_dkim_ohdrs(dkim, sig, ptrs, cnt)
+		DKIM *dkim
+		DKIM_SIGINFO *sig
+		unsigned char *ptrs = NO_INIT
+		int cnt
+	CODE:
+		RETVAL = dkim_ohdrs(dkim, sig, &ptrs, &cnt);
+	OUTPUT:
+		ptrs
+		cnt
+		RETVAL
 
 _Bool
 _dkim_getpartial(dkim)
@@ -695,6 +753,22 @@ _dkim_setpartial(dkim, value)
 		_Bool value
 	CODE:
 		RETVAL = dkim_setpartial(dkim, value);
+	OUTPUT:
+		RETVAL
+
+const char *
+_dkim_getdomain(dkim)
+		DKIM *dkim
+	CODE:
+		RETVAL = dkim_getdomain(dkim);
+	OUTPUT:
+		RETVAL
+
+int
+_dkim_getmode(dkim)
+		DKIM *dkim
+	CODE:
+		RETVAL = dkim_getmode(dkim);
 	OUTPUT:
 		RETVAL
 

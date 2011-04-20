@@ -4,7 +4,6 @@ MANIFEST
 OpenDKIM.xs
 ppport.h
 README
-t/Mail-OpenDKIM.t
 lib/Mail/OpenDKIM.pm
 lib/Mail/OpenDKIM/DKIM.pm
 typemap
