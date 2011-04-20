@@ -450,6 +450,40 @@ sub dkim_getmode
 	return Mail::OpenDKIM::_dkim_getmode($self->{_dkim_handle});
 }
 
+sub dkim_policy
+{
+	my ($self, $args) = @_;
+
+	unless($self->{_dkim_handle}) {
+		throw Error::Simple('dkim_policy called before dkim_verify');
+	}
+
+	my ($pcode, $pflags);
+
+	my $rc = Mail::OpenDKIM::_dkim_policy($self->{_dkim_handle}, $pcode, $pflags);
+
+	if($rc == DKIM_STAT_OK) {
+		$$args{pcode} = $pcode;
+		$$args{pflags} = $pflags;
+	} else {
+		$$args{pcode} = undef;
+		$$args{pflags} = undef;
+	}
+
+	return $rc;
+}
+
+sub dkim_getpresult
+{
+	my $self = shift;
+
+	unless($self->{_dkim_handle}) {
+		throw Error::Simple('dkim_getpresult called before dkim_verify');
+	}
+
+	return Mail::OpenDKIM::_dkim_getpresult($self->{_dkim_handle});
+}
+
 sub dkim_geterror
 {
 	my $self = shift;
@@ -562,6 +596,13 @@ For internal use by Mail::OpenDKIM only - do not call directly
 =head2 dkim_getdomain
 
 =head2 dkim_getmode
+
+=head2 dkim_policy
+
+The given value of pstate is ignored.
+The value sent to libOpenDKIM is always NULL.
+
+=head2 dkim_getpresult
 
 =head2 dkim_geterror
 

@@ -328,6 +328,7 @@ call_signature_tagvalues_callback(void *user, dkim_param_t pcode, const unsigned
 MODULE = Mail::OpenDKIM		PACKAGE = Mail::OpenDKIM
 PROTOTYPES: DISABLE
 
+# These routine are called directly from the user's Perl
 unsigned long
 dkim_ssl_version()
 	CODE:
@@ -350,6 +351,7 @@ dkim_getpolicystr(policy)
 	OUTPUT:
 		RETVAL
 
+# These routines are called by the glue layer which supplies them with an OO interface
 DKIM_LIB *
 _dkim_init()
 	CODE:
@@ -769,6 +771,26 @@ _dkim_getmode(dkim)
 		DKIM *dkim
 	CODE:
 		RETVAL = dkim_getmode(dkim);
+	OUTPUT:
+		RETVAL
+
+DKIM_STAT
+_dkim_policy(dkim, pcode, pflags)
+		DKIM *dkim;
+		dkim_policy_t pcode = NO_INIT
+		unsigned int pflags = NO_INIT
+	CODE:
+		RETVAL = dkim_policy(dkim, &pcode, &pflags, NULL);
+	OUTPUT:
+		pcode
+		pflags
+		RETVAL
+
+int
+_dkim_getpresult(dkim)
+		DKIM *dkim
+	CODE:
+		RETVAL = dkim_getpresult(dkim);
 	OUTPUT:
 		RETVAL
 

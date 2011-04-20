@@ -32,8 +32,6 @@ GETDOMAIN: {
 		});
 
 		ok(defined($v));
-
-		# d is a Mail::OpenDKIM::DKIM object
 	} catch Error with {
 		my $ex = shift;
 		fail($ex->stringify);
