@@ -46,7 +46,9 @@ GETDOMAIN: {
 	ok($d1->dkim_eoh() == DKIM_STAT_OK);
 	ok($d2->dkim_eoh() == DKIM_STAT_NOSIG);
 
-	ok($d1->dkim_minbody() == 4294967295);	# Posix::ULONG_MAX
+	my $m = $d1->dkim_minbody();
+
+	ok(($m == 4294967295) || ($m == 18446744073709551615));	# Posix::ULONG_MAX
 	ok($d2->dkim_minbody() == 0);
 
 	ok($d1->dkim_free() == DKIM_STAT_OK);
