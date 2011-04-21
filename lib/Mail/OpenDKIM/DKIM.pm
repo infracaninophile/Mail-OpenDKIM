@@ -511,7 +511,7 @@ sub dkim_policy_state_new
 	my $self = shift;
 
 	unless($self->{_dkim_handle}) {
-		throw Error::Simple('dkim_policy_new called before dkim_verify');
+		throw Error::Simple('dkim_policy_state_new called before dkim_verify');
 	}
 
 	return Mail::OpenDKIM::_dkim_policy_state_new($self->{_dkim_handle});
@@ -522,14 +522,49 @@ sub dkim_policy_state_free
 	my ($self, $args) = @_;
 
 	unless($self->{_dkim_handle}) {
-		throw Error::Simple('dkim_policy_free called before dkim_verify');
+		throw Error::Simple('dkim_policy_state_free called before dkim_verify');
 	}
 	foreach(qw(pstate)) {
-		exists($$args{$_}) or throw Error::Simple("dkim_setpartial missing argument '$_'");
-		defined($$args{$_}) or throw Error::Simple("dkim_setpartial undefined argument '$_'");
+		exists($$args{$_}) or throw Error::Simple("dkim_policy_state_free missing argument '$_'");
+		defined($$args{$_}) or throw Error::Simple("dkim_policy_state_free undefined argument '$_'");
 	}
 
 	return Mail::OpenDKIM::_dkim_policy_state_free($$args{pstate});
+}
+
+sub dkim_policy_getreportinfo
+{
+	my ($self, $args) = @_;
+
+	unless($self->{_dkim_handle}) {
+		throw Error::Simple('dkim_policy_getreportinfo called before dkim_verify');
+	}
+
+	my $interval = -1;
+
+	my $rc = Mail::OpenDKIM::_dkim_policy_getreportinfo($self->{_dkim_handle},
+		$$args{addrbuf} ? $$args{addrbuf} : 0, $$args{addrlen},
+		$$args{fmtbuf} ? $$args{fmtbuf} : 0, $$args{fmtlen},
+		$$args{optsbuf} ? $$args{optsbuf} : 0, $$args{optslen},
+		$$args{smtpbuf} ? $$args{smtpbuf} : 0, $$args{smtplen},
+		$interval);
+
+	if($rc == DKIM_STAT_OK) {
+		$$args{interval} = $interval;
+	}
+
+	return $rc;
+}
+
+sub dkim_policy_getdnssec
+{
+	my $self = shift;
+
+	unless($self->{_dkim_handle}) {
+		throw Error::Simple('dkim_policy_getdnssec called before dkim_verify');
+	}
+
+	return Mail::OpenDKIM::_dkim_policy_getdnssec($self->{_dkim_handle});
 }
 
 sub dkim_getpresult
@@ -541,6 +576,79 @@ sub dkim_getpresult
 	}
 
 	return Mail::OpenDKIM::_dkim_getpresult($self->{_dkim_handle});
+}
+
+sub dkim_sig_getbh
+{
+	my ($self, $args) = @_;
+
+	unless($self->{_dkim_handle}) {
+		throw Error::Simple('dkim_sig_getbh called before dkim_verify');
+	}
+	foreach(qw(sig)) {
+		exists($$args{$_}) or throw Error::Simple("dkim_sig_getbh missing argument '$_'");
+		defined($$args{$_}) or throw Error::Simple("dkim_sig_getbh undefined argument '$_'");
+	}
+
+	return Mail::OpenDKIM::_dkim_sig_getbh($$args{sig});
+}
+
+sub dkim_sig_getcanonlen
+{
+	my ($self, $args) = @_;
+
+	unless($self->{_dkim_handle}) {
+		throw Error::Simple('dkim_sig_getcanonlen called before dkim_verify');
+	}
+	foreach(qw(sig)) {
+		exists($$args{$_}) or throw Error::Simple("dkim_sig_getcanonlen missing argument '$_'");
+		defined($$args{$_}) or throw Error::Simple("dkim_sig_getcanonlen undefined argument '$_'");
+	}
+
+	my $msglen = $$args{msglen};
+	my $canonlen = $$args{canonlen};
+	my $signlen = $$args{signlen};
+
+	my $rc = Mail::OpenDKIM::_dkim_sig_getcanonlen($self->{_dkim_handle}, $$args{sig}, $msglen, $canonlen, $signlen);
+
+	if($rc == DKIM_STAT_OK) {
+		if(exists($$args{msglen})) {
+			$$args{msglen} = $msglen;
+		}
+		if(exists($$args{canonlen})) {
+			$$args{canonlen} = $canonlen;
+		}
+		if(exists($$args{signlen})) {
+			$$args{signlen} = $signlen;
+		}
+	}
+
+	return $rc;
+}
+
+sub dkim_sig_getcanons
+{
+	my ($self, $args) = @_;
+
+	unless($self->{_dkim_handle}) {
+		throw Error::Simple('dkim_sig_getcanons called before dkim_verify');
+	}
+
+	my $hdr = $$args{hdr};
+	my $body = $$args{body};
+
+	my $rc = Mail::OpenDKIM::_dkim_sig_getcanons($$args{sig}, $hdr, $body);
+
+	if($rc == DKIM_STAT_OK) {
+		if(exists($$args{hdr})) {
+			$$args{hdr} = $hdr;
+		}
+		if(exists($$args{body})) {
+			$$args{body} = $body;
+		}
+	}
+
+	return $rc;
 }
 
 sub dkim_geterror

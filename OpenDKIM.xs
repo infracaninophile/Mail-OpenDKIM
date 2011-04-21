@@ -841,6 +841,67 @@ _dkim_policy_state_free(pstate)
 	CODE:
 		dkim_policy_state_free(pstate);
 
+DKIM_STAT
+_dkim_policy_getreportinfo(dkim, addrbuf, addrlen, fmtbuf, fmtlen, optsbuf, optslen, smtpbuf, smtplen, interval)
+		DKIM *dkim
+		char *addrbuf
+		size_t addrlen
+		char *fmtbuf
+		size_t fmtlen
+		char *optsbuf
+		size_t optslen
+		char *smtpbuf
+		int smtplen
+		unsigned int interval = NO_INIT
+	CODE:
+		RETVAL = dkim_policy_getreportinfo(dkim, addrbuf, addrlen, fmtbuf, fmtlen, optsbuf, optslen, smtpbuf, smtplen, &interval);
+	OUTPUT:
+		interval
+		RETVAL
+
+unsigned int
+_dkim_sig_getbh(sig)
+		DKIM_SIGINFO *sig
+	CODE:
+		RETVAL = dkim_sig_getbh(sig);
+	OUTPUT:
+		RETVAL
+
+DKIM_STAT
+_dkim_sig_getcanonlen(dkim, sig, msglen, canonlen, signlen)
+		DKIM *dkim
+		DKIM_SIGINFO *sig
+		off_t msglen = NO_INIT
+		off_t canonlen = NO_INIT
+		off_t signlen = NO_INIT
+	CODE:
+		RETVAL = dkim_sig_getcanonlen(dkim, sig, &msglen, &canonlen, &signlen);
+	OUTPUT:
+		msglen
+		canonlen
+		signlen
+		RETVAL
+
+DKIM_STAT
+_dkim_sig_getcanons(sig, hdr, body)
+		DKIM_SIGINFO *sig
+		dkim_canon_t hdr = NO_INIT
+		dkim_canon_t body = NO_INIT
+	CODE:
+		RETVAL = dkim_sig_getcanons(sig, &hdr, &body);
+	OUTPUT:
+		hdr
+		body
+		RETVAL
+
+int
+_dkim_policy_getdnssec(dkim)
+		DKIM *dkim
+	CODE:
+		RETVAL = dkim_policy_getdnssec(dkim);
+	OUTPUT:
+		RETVAL
+
 int
 _dkim_getpresult(dkim)
 		DKIM *dkim
