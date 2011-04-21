@@ -1,8 +1,6 @@
 #!/usr/bin/perl -wT
 
-# TODO: test by adding z= to the signature header
-
-use Test::More tests => 11;
+use Test::More tests => 8;
 use Error qw(:try);
 BEGIN { use_ok('Mail::OpenDKIM') };
 
@@ -17,7 +15,7 @@ Subject: Testing D
 Can you hear me, Mother?
 EOF
 
-OHDRS: {
+GETUSER: {
 
 	my $o = new_ok('Mail::OpenDKIM');
 	ok($o->dkim_init());
@@ -43,23 +41,7 @@ OHDRS: {
 
 	ok($d->dkim_chunk({ chunkp => $msg, len => length($msg)}) == DKIM_STAT_OK);
 
-	ok($d->dkim_chunk({ chunkp => '', len => 0}) == DKIM_STAT_OK);
-
-	ok($d->dkim_eom() == DKIM_STAT_OK);
-
-	my $sig = $d->dkim_getsignature();
-
-	my @ptrs = [ '', '', '', '', '' ];
-	my $args = {
-		sig => $sig,
-		ptrs => \@ptrs,
-		cnt => 5
-	};
-
-	ok($d->dkim_ohdrs($args) == DKIM_STAT_OK);
-
-	# There are no z= headers
-	ok($$args{cnt} == 0);
+	ok($d->dkim_getuser() eq 'njh');
 
 	ok($d->dkim_free() == DKIM_STAT_OK);
 

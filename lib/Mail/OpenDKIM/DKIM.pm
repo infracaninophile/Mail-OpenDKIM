@@ -177,6 +177,17 @@ sub dkim_getsighdr_d
 	return $rc;
 }
 
+sub dkim_getsignature
+{
+	my $self = shift;
+
+	unless($self->{_dkim_handle}) {
+		throw Error::Simple('dkim_getsignature called before dkim_verify');
+	}
+
+	return Mail::OpenDKIM::_dkim_getsignature($self->{_dkim_handle});
+}
+
 sub dkim_getsiglist
 {
 	my ($self, $args) = @_;
@@ -439,6 +450,28 @@ sub dkim_getdomain
 	return Mail::OpenDKIM::_dkim_getdomain($self->{_dkim_handle});
 }
 
+sub dkim_getuser
+{
+	my $self = shift;
+
+	unless($self->{_dkim_handle}) {
+		throw Error::Simple('dkim_getuser called before dkim_sign/dkim_verify');
+	}
+
+	return Mail::OpenDKIM::_dkim_getuser($self->{_dkim_handle});
+}
+
+sub dkim_minbody
+{
+	my $self = shift;
+
+	unless($self->{_dkim_handle}) {
+		throw Error::Simple('dkim_minbody called before dkim_sign/dkim_verify');
+	}
+
+	return Mail::OpenDKIM::_dkim_minbody($self->{_dkim_handle});
+}
+
 sub dkim_getmode
 {
 	my $self = shift;
@@ -460,7 +493,7 @@ sub dkim_policy
 
 	my ($pcode, $pflags);
 
-	my $rc = Mail::OpenDKIM::_dkim_policy($self->{_dkim_handle}, $pcode, $pflags);
+	my $rc = Mail::OpenDKIM::_dkim_policy($self->{_dkim_handle}, $pcode, $pflags, $$args{pstate} ? $$args{pstate} : 0);
 
 	if($rc == DKIM_STAT_OK) {
 		$$args{pcode} = $pcode;
@@ -471,6 +504,32 @@ sub dkim_policy
 	}
 
 	return $rc;
+}
+
+sub dkim_policy_state_new
+{
+	my $self = shift;
+
+	unless($self->{_dkim_handle}) {
+		throw Error::Simple('dkim_policy_new called before dkim_verify');
+	}
+
+	return Mail::OpenDKIM::_dkim_policy_state_new($self->{_dkim_handle});
+}
+
+sub dkim_policy_state_free
+{
+	my ($self, $args) = @_;
+
+	unless($self->{_dkim_handle}) {
+		throw Error::Simple('dkim_policy_free called before dkim_verify');
+	}
+	foreach(qw(pstate)) {
+		exists($$args{$_}) or throw Error::Simple("dkim_setpartial missing argument '$_'");
+		defined($$args{$_}) or throw Error::Simple("dkim_setpartial undefined argument '$_'");
+	}
+
+	return Mail::OpenDKIM::_dkim_policy_state_free($$args{pstate});
 }
 
 sub dkim_getpresult
@@ -595,9 +654,17 @@ For internal use by Mail::OpenDKIM only - do not call directly
 
 =head2 dkim_getdomain
 
+=head2 dkim_getuser
+
+=head2 dkim_minbody
+
 =head2 dkim_getmode
 
 =head2 dkim_policy
+
+=head2 dkim_policy_state_new
+
+=head2 dkim_policy_state_free
 
 The given value of pstate is ignored.
 The value sent to libOpenDKIM is always NULL.

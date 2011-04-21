@@ -5,6 +5,7 @@ DKIM_STAT	T_INT
 DKIM_STAT *	T_PTR
 DKIM_SIGINFO *	T_PTROBJ
 DKIM_SIGINFO **	T_PTR
+DKIM_PSTATE *	T_PTR
 dkim_canon_t	T_ENUM
 dkim_alg_t	T_ENUM
 dkim_param_t	T_ENUM

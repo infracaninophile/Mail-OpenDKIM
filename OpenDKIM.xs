@@ -328,7 +328,7 @@ call_signature_tagvalues_callback(void *user, dkim_param_t pcode, const unsigned
 MODULE = Mail::OpenDKIM		PACKAGE = Mail::OpenDKIM
 PROTOTYPES: DISABLE
 
-# These routine are called directly from the user's Perl
+# These routines are called directly from the user's Perl
 unsigned long
 dkim_ssl_version()
 	CODE:
@@ -348,6 +348,22 @@ dkim_getpolicystr(policy)
 		dkim_policy_t policy
 	CODE:
 		RETVAL = dkim_getpolicystr(policy);
+	OUTPUT:
+		RETVAL
+
+const char *
+dkim_getpresultstr(policy)
+		dkim_policy_t policy
+	CODE:
+		RETVAL = dkim_getpresultstr(policy);
+	OUTPUT:
+		RETVAL
+
+const char *
+dkim_getresultstr(result)
+		DKIM_STAT result
+	CODE:
+		RETVAL = dkim_getresultstr(result);
 	OUTPUT:
 		RETVAL
 
@@ -700,6 +716,14 @@ _dkim_getsighdr_d(dkim, initial, buf, len)
 		len
 		RETVAL
 
+DKIM_SIGINFO *
+_dkim_getsignature(dkim)
+		DKIM *dkim
+	CODE:
+		RETVAL = dkim_getsignature(dkim);
+	OUTPUT:
+		RETVAL
+
 # Returns 3 values: $rc, $nsigs, @sigs
 void
 _dkim_getsiglist(dkim)
@@ -766,6 +790,22 @@ _dkim_getdomain(dkim)
 	OUTPUT:
 		RETVAL
 
+const char *
+_dkim_getuser(dkim)
+		DKIM *dkim
+	CODE:
+		RETVAL = dkim_getuser(dkim);
+	OUTPUT:
+		RETVAL
+
+unsigned long
+_dkim_minbody(dkim)
+		DKIM *dkim
+	CODE:
+		RETVAL = dkim_minbody(dkim);
+	OUTPUT:
+		RETVAL
+
 int
 _dkim_getmode(dkim)
 		DKIM *dkim
@@ -775,16 +815,31 @@ _dkim_getmode(dkim)
 		RETVAL
 
 DKIM_STAT
-_dkim_policy(dkim, pcode, pflags)
+_dkim_policy(dkim, pcode, pflags, pstate)
 		DKIM *dkim;
 		dkim_policy_t pcode = NO_INIT
 		unsigned int pflags = NO_INIT
+		DKIM_PSTATE *pstate
 	CODE:
-		RETVAL = dkim_policy(dkim, &pcode, &pflags, NULL);
+		RETVAL = dkim_policy(dkim, &pcode, &pflags, pstate);
 	OUTPUT:
 		pcode
 		pflags
 		RETVAL
+
+DKIM_PSTATE *
+_dkim_policy_state_new(dkim)
+		DKIM *dkim;
+	CODE:
+		RETVAL = dkim_policy_state_new(dkim);
+	OUTPUT:
+		RETVAL
+
+void
+_dkim_policy_state_free(pstate)
+		DKIM_PSTATE *pstate;
+	CODE:
+		dkim_policy_state_free(pstate);
 
 int
 _dkim_getpresult(dkim)

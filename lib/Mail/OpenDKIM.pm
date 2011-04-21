@@ -29,6 +29,7 @@ use constant DKIM_SIGN_RSASHA256 => 1;
 
 use constant DKIM_STAT_OK => 0;	# dkim.h
 use constant DKIM_STAT_BADSIG => 1;
+use constant DKIM_STAT_NOSIG => 2;
 use constant DKIM_STAT_NORESOURCE => 6;
 use constant DKIM_STAT_INVALID => 9;
 use constant DKIM_STAT_NOTIMPLEMENT => 10;
@@ -66,6 +67,7 @@ our @EXPORT = qw(
 
 	DKIM_STAT_OK
 	DKIM_STAT_BADSIG
+	DKIM_STAT_NOSIG
 	DKIM_STAT_NORESOURCE
 	DKIM_STAT_INVALID
 	DKIM_STAT_NOTIMPLEMENT
