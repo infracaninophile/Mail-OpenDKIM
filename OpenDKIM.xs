@@ -616,6 +616,44 @@ _dkim_eom(dkim)
 	OUTPUT:
 		RETVAL
 
+const char *
+_dkim_getid(dkim)
+		DKIM *dkim
+	CODE:
+		RETVAL = dkim_getid(dkim);
+	OUTPUT:
+		RETVAL
+
+uint64_t
+_dkim_get_msgdate(dkim)
+		DKIM *dkim
+	CODE:
+		RETVAL = dkim_get_msgdate(dkim);
+	OUTPUT:
+		RETVAL
+
+DKIM_STAT
+_dkim_get_sigsubstring(dkim, sig, buf, buflen)
+		DKIM *dkim
+		DKIM_SIGINFO *sig
+		char *buf
+		size_t buflen
+	CODE:
+		RETVAL = dkim_get_sigsubstring(dkim, sig, buf, &buflen);
+	OUTPUT:
+		buflen
+		RETVAL
+
+DKIM_STAT
+_dkim_key_syntax(dkim, str, len)
+		DKIM *dkim
+		unsigned char *str
+		size_t len
+	CODE:
+		RETVAL = dkim_key_syntax(dkim, str, len);
+	OUTPUT:
+		RETVAL
+
 unsigned char *
 _dkim_get_signer(dkim)
 		DKIM *dkim
@@ -956,6 +994,96 @@ _dkim_sig_getidentity(dkim, sig, val, vallen)
 		size_t vallen
 	CODE:
 		RETVAL = dkim_sig_getidentity(dkim, sig, val, vallen);
+	OUTPUT:
+		RETVAL
+
+DKIM_STAT
+_dkim_sig_getkeysize(sig, bits)
+		DKIM_SIGINFO *sig
+		unsigned int bits = NO_INIT
+	CODE:
+		RETVAL = dkim_sig_getkeysize(sig, &bits);
+	OUTPUT:
+		bits
+		RETVAL
+
+DKIM_STAT
+_dkim_sig_getreportinfo(dkim, sig, hfd, bfd, addrbuf, addrlen, fmtbuf, fmtlen, optsbuf, optslen, smtpbuf, smtplen, interval)
+		DKIM *dkim
+		DKIM_SIGINFO *sig
+		int *hfd
+		int *bfd
+		char *addrbuf
+		size_t addrlen
+		char *fmtbuf
+		size_t fmtlen
+		char *optsbuf
+		size_t optslen
+		char *smtpbuf
+		int smtplen
+		unsigned int interval = NO_INIT
+	CODE:
+		RETVAL = dkim_sig_getreportinfo(dkim, sig, hfd, bfd, addrbuf, addrlen, fmtbuf, fmtlen, optsbuf, optslen, smtpbuf, smtplen, &interval);
+	OUTPUT:
+		interval
+		RETVAL
+
+const char *
+_dkim_sig_getselector(sig)
+		DKIM_SIGINFO *sig
+	CODE:
+		RETVAL = dkim_sig_getselector(sig);
+	OUTPUT:
+		RETVAL
+
+DKIM_STAT
+_dkim_sig_getsignalg(sig, alg)
+		DKIM_SIGINFO *sig
+		dkim_alg_t alg = NO_INIT
+	CODE:
+		RETVAL = dkim_sig_getsignalg(sig, &alg);
+	OUTPUT:
+		alg
+		RETVAL
+
+DKIM_STAT
+_dkim_sig_getsignedhdrs(dkim, sig, hdrs, hdrlen, nhdrs)
+		DKIM *dkim
+		DKIM_SIGINFO *sig
+		unsigned char *hdrs
+		size_t hdrlen
+		unsigned int nhdrs
+	CODE:
+		RETVAL = dkim_sig_getsignedhdrs(dkim, sig, hdrs, hdrlen, &nhdrs);
+	OUTPUT:
+		nhdrs
+		RETVAL
+
+DKIM_STAT
+_dkim_sig_getsigntime(sig, when)
+		DKIM_SIGINFO *sig
+		uint64_t when
+	CODE:
+		RETVAL = dkim_sig_getsigntime(sig, &when);
+	OUTPUT:
+		when
+		RETVAL
+
+bool
+_dkim_sig_hdrsigned(sig, hdr)
+		DKIM_SIGINFO *sig
+		char *hdr
+	CODE:
+		RETVAL = dkim_sig_hdrsigned(sig, hdr);
+	OUTPUT:
+		RETVAL
+
+DKIM_STAT
+_dkim_sig_process(dkim, sig)
+		DKIM *dkim
+		DKIM_SIGINFO *sig
+	CODE:
+		RETVAL = dkim_sig_process(dkim, sig);
 	OUTPUT:
 		RETVAL
 

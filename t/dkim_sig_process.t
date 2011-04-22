@@ -1,6 +1,6 @@
 #!/usr/bin/perl -wT
 
-use Test::More tests => 12;
+use Test::More tests => 14;
 use Error qw(:try);
 BEGIN { use_ok('Mail::OpenDKIM') };
 
@@ -52,6 +52,16 @@ SIG_PROCESS: {
 	ok($d->dkim_sig_process({ sig => $sig }) == DKIM_STAT_OK);
 
 	ok($d->dkim_sig_getbh({ sig => $sig }) == DKIM_SIGBH_MATCH);
+
+	my $args = {
+		sig => $sig,
+		buf => pack('B' x 80, 0 x 80),
+		buflen => 80
+	};
+
+	ok($d->dkim_get_sigsubstring($args) == DKIM_STAT_OK);
+
+	like($$args{buf}, qr/^dMk1p8wJ/);	# Start of the b= value
 
 	ok($d->dkim_free() == DKIM_STAT_OK);
 

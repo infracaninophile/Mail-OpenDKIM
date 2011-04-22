@@ -141,6 +141,67 @@ sub dkim_eom
 	return Mail::OpenDKIM::_dkim_eom($self->{_dkim_handle});
 }
 
+sub dkim_getid
+{
+	my $self = shift;
+
+	unless($self->{_dkim_handle}) {
+		throw Error::Simple('dkim_getid called before dkim_sign/dkim_verify');
+	}
+
+	return Mail::OpenDKIM::_dkim_getid($self->{_dkim_handle});
+}
+
+sub dkim_get_msgdate
+{
+	my $self = shift;
+
+	unless($self->{_dkim_handle}) {
+		throw Error::Simple('dkim_get_msgdate called before dkim_sign/dkim_verify');
+	}
+
+	return Mail::OpenDKIM::_dkim_get_msgdate($self->{_dkim_handle});
+}
+
+sub dkim_get_sigsubstring
+{
+	my ($self, $args) = @_;
+
+	unless($self->{_dkim_handle}) {
+		throw Error::Simple('dkim_get_sigsubstring called before dkim_sign/dkim_verify');
+	}
+	foreach(qw(sig buf buflen)) {
+		exists($$args{$_}) or throw Error::Simple("dkim_get_sigsubstring missing argument '$_'");
+		defined($$args{$_}) or throw Error::Simple("dkim_key_getsigsubstring undefined argument '$_'");
+	}
+
+	my $buflen = $$args{buflen};
+
+	my $rc =  Mail::OpenDKIM::_dkim_get_sigsubstring($self->{_dkim_handle}, $$args{sig}, $$args{buf}, $buflen);
+
+	if($rc == DKIM_STAT_OK) {
+		$$args{buflen} = $buflen;
+	}
+	return $rc;
+}
+
+sub dkim_key_syntax
+{
+	my ($self, $args) = @_;
+
+	unless($self->{_dkim_handle}) {
+		throw Error::Simple('dkim_key_syntax called before dkim_sign/dkim_verify');
+	}
+
+	foreach(qw(str len)) {
+		exists($$args{$_}) or throw Error::Simple("dkim_key_syntax missing argument '$_'");
+		defined($$args{$_}) or throw Error::Simple("dkim_key_syntax undefined argument '$_'");
+	}
+
+	return Mail::OpenDKIM::_dkim_key_syntax($self->{_dkim_handle}, $$args{str}, $$args{len});
+
+}
+
 sub dkim_getsighdr
 {
 	my ($self, $args) = @_;
@@ -663,13 +724,149 @@ sub dkim_sig_getcontext
 	return Mail::OpenDKIM::_dkim_sig_getcontext($$args{sig});
 }
 
+sub dkim_sig_getreportinfo
+{
+	my ($self, $args) = @_;
+
+	unless($self->{_dkim_handle}) {
+		throw Error::Simple('dkim_policy_getreportinfo called before dkim_verify');
+	}
+
+	foreach(qw(sig)) {
+		exists($$args{$_}) or throw Error::Simple("dkim_sig_getreportinfo missing argument '$_'");
+		defined($$args{$_}) or throw Error::Simple("dkim_sig_reportinfo undefined argument '$_'");
+	}
+	my $interval = -1;
+
+	my $rc = Mail::OpenDKIM::_dkim_sig_getreportinfo($self->{_dkim_handle}, $$args{sig},
+		$$args{hfd} ? $$args{hfd} : 0,
+		$$args{bfd} ? $$args{bfd} : 0,
+		$$args{addrbuf} ? $$args{addrbuf} : 0, $$args{addrlen},
+		$$args{fmtbuf} ? $$args{fmtbuf} : 0, $$args{fmtlen},
+		$$args{optsbuf} ? $$args{optsbuf} : 0, $$args{optslen},
+		$$args{smtpbuf} ? $$args{smtpbuf} : 0, $$args{smtplen},
+		$interval);
+
+	if($rc == DKIM_STAT_OK) {
+		$$args{interval} = $interval;
+	}
+
+	return $rc;
+}
+
+sub dkim_sig_getselector
+{
+	my ($self, $args) = @_;
+
+	foreach(qw(sig)) {
+		exists($$args{$_}) or throw Error::Simple("dkim_sig_getselector missing argument '$_'");
+		defined($$args{$_}) or throw Error::Simple("dkim_sig_selector undefined argument '$_'");
+	}
+	
+	return Mail::OpenDKIM::_dkim_sig_getselector($$args{sig});
+}
+
+sub dkim_sig_getsignalg
+{
+	my ($self, $args) = @_;
+
+	foreach(qw(sig)) {
+		exists($$args{$_}) or throw Error::Simple("dkim_sig_getsignalg missing argument '$_'");
+		defined($$args{$_}) or throw Error::Simple("dkim_sig_getsignalg undefined argument '$_'");
+	}
+	
+	my $alg = -1;
+
+	my $rc =  Mail::OpenDKIM::_dkim_sig_getsignalg($$args{sig}, $alg);
+
+	if($rc == DKIM_STAT_OK) {
+		$$args{alg} = $alg;
+	}
+
+	return $rc;
+}
+
+sub dkim_sig_getsignedhdrs
+{
+	my ($self, $args) = @_;
+
+	unless($self->{_dkim_handle}) {
+		throw Error::Simple('dkim_sig_getsignedhdrs called before dkim_verify');
+	}
+
+	foreach(qw(sig hdrs hdrlen nhdrs)) {
+		exists($$args{$_}) or throw Error::Simple("dkim_sig_getsignedhdrs missing argument '$_'");
+		defined($$args{$_}) or throw Error::Simple("dkim_sig_getsignedhdrs undefined argument '$_'");
+	}
+	
+	my $nhdrs = $$args{nhdrs};
+
+	my $rc =  Mail::OpenDKIM::_dkim_sig_getsignedhdrs($self->{_dkim_handle}, $$args{sig}, $$args{hdrs}, $$args{hdrlen}, $nhdrs);
+
+	if($rc == DKIM_STAT_OK) {
+		$$args{nhdrs} = $nhdrs;
+	} else {
+		$$args{nhdrs} = undef;
+	}
+
+	return $rc;
+}
+
+sub dkim_sig_getsigntime
+{
+	my ($self, $args) = @_;
+
+	foreach(qw(sig)) {
+		exists($$args{$_}) or throw Error::Simple("dkim_sig_getsigntime missing argument '$_'");
+		defined($$args{$_}) or throw Error::Simple("dkim_sig_getsigntime undefined argument '$_'");
+	}
+
+	my $when = -1;
+
+	my $rc = Mail::OpenDKIM::_dkim_sig_getsigntime($$args{sig}, $when);
+
+	if($rc == DKIM_STAT_OK) {
+		$$args{when} = $when;
+	}
+
+	return $rc;
+}
+
+sub dkim_sig_process
+{
+	my ($self, $args) = @_;
+
+	unless($self->{_dkim_handle}) {
+		throw Error::Simple('dkim_sig_process called before dkim_verify');
+	}
+
+	foreach(qw(sig)) {
+		exists($$args{$_}) or throw Error::Simple("dkim_sig_process missing argument '$_'");
+		defined($$args{$_}) or throw Error::Simple("dkim_sig_process undefined argument '$_'");
+	}
+
+	return Mail::OpenDKIM::_dkim_sig_process($self->{_dkim_handle}, $$args{sig});
+}
+
+sub dkim_sig_hdrsigned
+{
+	my ($self, $args) = @_;
+
+	foreach(qw(sig hdr)) {
+		exists($$args{$_}) or throw Error::Simple("dkim_sig_hdrsigned missing argument '$_'");
+		defined($$args{$_}) or throw Error::Simple("dkim_sig_hdrsigned undefined argument '$_'");
+	}
+
+	my $rc = Mail::OpenDKIM::_dkim_sig_hdrsigned($$args{sig}, $$args{hdr});
+}
+
 sub dkim_sig_getdnssec
 {
 	my ($self, $args) = @_;
 
 	foreach(qw(sig)) {
 		exists($$args{$_}) or throw Error::Simple("dkim_sig_getdnssec missing argument '$_'");
-		defined($$args{$_}) or throw Error::Simple("dkim_sig_getcdnssec undefined argument '$_'");
+		defined($$args{$_}) or throw Error::Simple("dkim_sig_getdnssec undefined argument '$_'");
 	}
 
 	return Mail::OpenDKIM::_dkim_sig_getdnssec($$args{sig});
@@ -726,6 +923,27 @@ sub dkim_sig_getflags
 
 	return Mail::OpenDKIM::_dkim_sig_getflags($$args{sig});
 }
+
+sub dkim_sig_getkeysize
+{
+	my ($self, $args) = @_;
+
+	foreach(qw(sig)) {
+		exists($$args{$_}) or throw Error::Simple("dkim_sig_getkeysize missing argument '$_'");
+		defined($$args{$_}) or throw Error::Simple("dkim_sig_getkeysize undefined argument '$_'");
+	}
+
+	my $bits;
+
+	my $rc =  Mail::OpenDKIM::_dkim_sig_getkeysize($$args{sig}, $bits);
+
+	if($rc == DKIM_STAT_OK) {
+		$$args{bits} = $bits;
+	}
+
+	return $rc;
+}
+
 
 sub dkim_sig_geterror
 {
@@ -818,6 +1036,12 @@ For internal use by Mail::OpenDKIM only - do not call directly
 
 =head2 dkim_eom
 
+=head2 dkim_getid
+
+=head2 dkim_get_msgdate
+
+=head2 dkim_key_syntax
+
 =head2 dkim_getsighdr
 
 =head2 dkim_getsighdr_d
@@ -858,6 +1082,8 @@ For internal use by Mail::OpenDKIM only - do not call directly
 
 =head2 dkim_policy
 
+=head2 dkim_policy_getreportinfo
+
 =head2 dkim_policy_state_new
 
 =head2 dkim_policy_state_free
@@ -875,11 +1101,25 @@ The value sent to libOpenDKIM is always NULL.
 
 =head2 dkim_sig_getidentity
 
+=head2 dkim_sig_getselector
+
+=head2 dkim_sig_getsignalg
+
+=head2 dkim_sig_getsignedheaders
+
+=head2 dkim_sig_getsigntime
+
+=head2 dkim_sig_process
+
+=head2 dkim_sig_hdrsigned
+
 =head2 dkim_sig_getdnssec
 
 =head2 dkim_sig_getdomain
 
 =head2 dkim_sig_getflags
+
+=head2 dkim_sig_getkeysize
 
 =head2 dkim_sig_geterror
 

@@ -6,7 +6,7 @@ BEGIN { use_ok('Mail::OpenDKIM') };
 
 #########################
 
-FLUSH_CACHE: {
+GET_SIGNER: {
 
 	my $o = new_ok('Mail::OpenDKIM');
 	ok($o->dkim_init());
