@@ -367,6 +367,14 @@ dkim_getresultstr(result)
 	OUTPUT:
 		RETVAL
 
+const char *
+dkim_sig_geterrorstr(sigerr)
+		DKIM_SIGERROR sigerr
+	CODE:
+		RETVAL = dkim_sig_geterrorstr(sigerr);
+	OUTPUT:
+		RETVAL
+
 # These routines are called by the glue layer which supplies them with an OO interface
 DKIM_LIB *
 _dkim_init()
@@ -892,6 +900,63 @@ _dkim_sig_getcanons(sig, hdr, body)
 	OUTPUT:
 		hdr
 		body
+		RETVAL
+
+void *
+_dkim_sig_getcontext(sig)
+		DKIM_SIGINFO *sig
+	CODE:
+		RETVAL = dkim_sig_getcontext(sig);
+	OUTPUT:
+		RETVAL
+
+int
+_dkim_sig_getdnssec(sig)
+		DKIM_SIGINFO *sig
+	CODE:
+		RETVAL = dkim_sig_getdnssec(sig);
+	OUTPUT:
+		RETVAL
+
+const char *
+_dkim_sig_getdomain(sig)
+		DKIM_SIGINFO *sig
+	CODE:
+		RETVAL = dkim_sig_getdomain(sig);
+	OUTPUT:
+		RETVAL
+
+int
+_dkim_sig_geterror(sig)
+		DKIM_SIGINFO *sig
+	CODE:
+		RETVAL = dkim_sig_geterror(sig);
+	OUTPUT:
+		RETVAL
+
+unsigned int
+_dkim_sig_getflags(sig)
+		DKIM_SIGINFO *sig
+	CODE:
+		RETVAL = dkim_sig_getflags(sig);
+	OUTPUT:
+		RETVAL
+
+void
+_dkim_sig_ignore(sig)
+		DKIM_SIGINFO *sig
+	CODE:
+		dkim_sig_ignore(sig);
+
+DKIM_STAT
+_dkim_sig_getidentity(dkim, sig, val, vallen)
+		DKIM *dkim
+		DKIM_SIGINFO *sig
+		char *val
+		size_t vallen
+	CODE:
+		RETVAL = dkim_sig_getidentity(dkim, sig, val, vallen);
+	OUTPUT:
 		RETVAL
 
 int

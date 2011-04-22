@@ -52,6 +52,8 @@ use constant DKIM_DNSSEC_UNKNOWN => -1;
 
 use constant DKIM_SIGBH_MATCH => 0;
 
+use constant DKIM_SIGERROR_VERSION => 1;
+
 use constant DKIM_FEATURE_DIFFHEADERS => 0;
 use constant DKIM_FEATURE_DKIM_REPUTATION => 1;
 use constant DKIM_FEATURE_PARSE_TIME => 2;
@@ -61,6 +63,8 @@ use constant DKIM_FEATURE_OVERSIGN => 5;
 use constant DKIM_FEATURE_DNSSEC => 6;
 use constant DKIM_FEATURE_RESIGN => 7;
 use constant DKIM_FEATURE_ATPS => 8;
+
+use constant DKIM_SIGFLAG_IGNORE => 1;
 
 our @EXPORT_OK = ( @{ $EXPORT_TAGS{'all'} } );
 
@@ -91,6 +95,8 @@ our @EXPORT = qw(
 
 	DKIM_SIGBH_MATCH
 
+	DKIM_SIGERROR_VERSION
+
 	DKIM_PRESULT_NONE
 	DKIM_PRESULT_NXDOMAIN
 	DKIM_PRESULT_FOUND
@@ -104,6 +110,8 @@ our @EXPORT = qw(
 	DKIM_FEATURE_DNSSEC
 	DKIM_FEATURE_RESIGN
 	DKIM_FEATURE_ATPS
+
+	DKIM_SIGFLAG_IGNORE
 );
 
 our $VERSION = '0.01';
@@ -345,11 +353,10 @@ Mail::OpenDKIM - Perl interface to the OpenDKIM library
 
 =head1 DESCRIPTION
 
-Stub documentation for Mail::OpenDKIM, created by h2xs. It looks like the
-author of the extension was negligent enough to leave the stub
-unedited.
+The signature creation rountines have been tested more thoroughly than the signature
+verification routines.
 
-Blah blah blah.
+Feedback will be greatfully received.
 
 =head1 SUBROUTINES/Methods
 

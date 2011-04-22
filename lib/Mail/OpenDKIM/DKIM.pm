@@ -651,6 +651,94 @@ sub dkim_sig_getcanons
 	return $rc;
 }
 
+sub dkim_sig_getcontext
+{
+	my ($self, $args) = @_;
+
+	foreach(qw(sig)) {
+		exists($$args{$_}) or throw Error::Simple("dkim_sig_getcontext missing argument '$_'");
+		defined($$args{$_}) or throw Error::Simple("dkim_sig_getcontext undefined argument '$_'");
+	}
+
+	return Mail::OpenDKIM::_dkim_sig_getcontext($$args{sig});
+}
+
+sub dkim_sig_getdnssec
+{
+	my ($self, $args) = @_;
+
+	foreach(qw(sig)) {
+		exists($$args{$_}) or throw Error::Simple("dkim_sig_getdnssec missing argument '$_'");
+		defined($$args{$_}) or throw Error::Simple("dkim_sig_getcdnssec undefined argument '$_'");
+	}
+
+	return Mail::OpenDKIM::_dkim_sig_getdnssec($$args{sig});
+}
+
+sub dkim_sig_getdomain
+{
+	my ($self, $args) = @_;
+
+	foreach(qw(sig)) {
+		exists($$args{$_}) or throw Error::Simple("dkim_sig_getdomain missing argument '$_'");
+		defined($$args{$_}) or throw Error::Simple("dkim_sig_getdomain undefined argument '$_'");
+	}
+
+	return Mail::OpenDKIM::_dkim_sig_getdomain($$args{sig});
+}
+
+sub dkim_sig_ignore
+{
+	my ($self, $args) = @_;
+
+	foreach(qw(sig)) {
+		exists($$args{$_}) or throw Error::Simple("dkim_sig_ignore missing argument '$_'");
+		defined($$args{$_}) or throw Error::Simple("dkim_sig_ignore undefined argument '$_'");
+	}
+
+	return Mail::OpenDKIM::_dkim_sig_ignore($$args{sig});
+}
+
+sub dkim_sig_getidentity
+{
+	my ($self, $args) = @_;
+
+	unless($self->{_dkim_handle}) {
+		throw Error::Simple('dkim_sig_getidentity called before dkim_verify');
+	}
+
+	foreach(qw(sig val vallen)) {
+		exists($$args{$_}) or throw Error::Simple("dkim_sig_getidentity missing argument '$_'");
+		defined($$args{$_}) or throw Error::Simple("dkim_sig_getidentity undefined argument '$_'");
+	}
+
+	return Mail::OpenDKIM::_dkim_sig_getidentity($self->{_dkim_handle}, $$args{sig}, $$args{val}, $$args{vallen});
+}
+
+sub dkim_sig_getflags
+{
+	my ($self, $args) = @_;
+
+	foreach(qw(sig)) {
+		exists($$args{$_}) or throw Error::Simple("dkim_sig_getflags missing argument '$_'");
+		defined($$args{$_}) or throw Error::Simple("dkim_sig_getflags undefined argument '$_'");
+	}
+
+	return Mail::OpenDKIM::_dkim_sig_getflags($$args{sig});
+}
+
+sub dkim_sig_geterror
+{
+	my ($self, $args) = @_;
+
+	foreach(qw(sig)) {
+		exists($$args{$_}) or throw Error::Simple("dkim_sig_geterror missing argument '$_'");
+		defined($$args{$_}) or throw Error::Simple("dkim_sig_geterror undefined argument '$_'");
+	}
+
+	return Mail::OpenDKIM::_dkim_sig_geterror($$args{sig});
+}
+
 sub dkim_geterror
 {
 	my $self = shift;
@@ -779,6 +867,22 @@ The value sent to libOpenDKIM is always NULL.
 
 =head2 dkim_getpresult
 
+=head2 dkim_getbh
+
+=head2 dkim_sig_getcanons
+
+=head2 dkim_sig_getcontext
+
+=head2 dkim_sig_getidentity
+
+=head2 dkim_sig_getdnssec
+
+=head2 dkim_sig_getdomain
+
+=head2 dkim_sig_getflags
+
+=head2 dkim_sig_geterror
+
 =head2 dkim_geterror
 
 =head2 dkim_free
@@ -787,17 +891,14 @@ The value sent to libOpenDKIM is always NULL.
 
 All the function names and constants
 
+=head2 BUGS
+
+The sig routines would be better if they were in a separate class.
+
 
 =head1 SEE ALSO
 
-Mention other useful documentation such as the documentation of
-related modules or operating system documentation (such as man pages
-in UNIX), or any relevant external documentation such as RFCs or
-standards.
-
-If you have a mailing list set up for your module, mention it here.
-
-If you have a web site set up for your module, mention it here.
+http://www.opendkim.org/libopendkim/
 
 =head1 AUTHOR
 
