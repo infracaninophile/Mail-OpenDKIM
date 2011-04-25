@@ -375,6 +375,18 @@ dkim_sig_geterrorstr(sigerr)
 	OUTPUT:
 		RETVAL
 
+int
+dkim_mail_parse(line, user_out, domain_out)
+		char *line
+		unsigned char *user_out = NO_INIT
+		unsigned char *domain_out = NO_INIT
+	CODE:
+		RETVAL = dkim_mail_parse(line, &user_out, &domain_out);
+	OUTPUT:
+		user_out
+		domain_out
+		RETVAL
+
 # These routines are called by the glue layer which supplies them with an OO interface
 DKIM_LIB *
 _dkim_init()
@@ -388,6 +400,18 @@ _dkim_close(d)
 		DKIM_LIB *d
 	CODE:
 		dkim_close(d);
+
+DKIM_STAT
+_dkim_options(lib, op, opt, data, len)
+		DKIM_LIB *lib
+		int op
+		int opt
+		void *data
+		size_t len
+	CODE:
+		RETVAL = dkim_options(lib, op, opt, data, len);
+	OUTPUT:
+		RETVAL
 
 _Bool
 _dkim_libfeature(d, fc)
@@ -1087,11 +1111,41 @@ _dkim_sig_process(dkim, sig)
 	OUTPUT:
 		RETVAL
 
+unsigned char *
+_dkim_sig_gettagvalue(sig, keytag, tag)
+		DKIM_SIGINFO *sig
+		_Bool keytag
+		char *tag
+	CODE:
+		RETVAL = dkim_sig_gettagvalue(sig, keytag, tag);
+	OUTPUT:
+		RETVAL
+
 int
 _dkim_policy_getdnssec(dkim)
 		DKIM *dkim
 	CODE:
 		RETVAL = dkim_policy_getdnssec(dkim);
+	OUTPUT:
+		RETVAL
+
+int
+_dkim_policy_syntax(dkim, str, len)
+		DKIM *dkim
+		unsigned char *str
+		size_t len
+	CODE:
+		RETVAL = dkim_policy_syntax(dkim, str, len);
+	OUTPUT:
+		RETVAL
+
+int
+_dkim_sig_syntax(dkim, str, len)
+		DKIM *dkim
+		unsigned char *str
+		size_t len
+	CODE:
+		RETVAL = dkim_policy_syntax(dkim, str, len);
 	OUTPUT:
 		RETVAL
 

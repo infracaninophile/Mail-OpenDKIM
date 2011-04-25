@@ -31,6 +31,7 @@ use constant DKIM_STAT_OK => 0;	# dkim.h
 use constant DKIM_STAT_BADSIG => 1;
 use constant DKIM_STAT_NOSIG => 2;
 use constant DKIM_STAT_CANTVRFY => 4;
+use constant DKIM_STAT_SYNTAX => 5;
 use constant DKIM_STAT_NORESOURCE => 6;
 use constant DKIM_STAT_INVALID => 9;
 use constant DKIM_STAT_NOTIMPLEMENT => 10;
@@ -66,6 +67,11 @@ use constant DKIM_FEATURE_ATPS => 8;
 
 use constant DKIM_SIGFLAG_IGNORE => 1;
 
+use constant DKIM_OP_GETOPT => 0;
+use constant DKIM_OP_SETOPT => 1;
+
+use constant DKIM_OPTS_TMPDIR => 1;
+
 our @EXPORT_OK = ( @{ $EXPORT_TAGS{'all'} } );
 
 our @EXPORT = qw(
@@ -79,6 +85,7 @@ our @EXPORT = qw(
 	DKIM_STAT_BADSIG
 	DKIM_STAT_NOSIG
 	DKIM_STAT_CANTVRFY
+	DKIM_STAT_SYNTAX
 	DKIM_STAT_NORESOURCE
 	DKIM_STAT_INVALID
 	DKIM_STAT_NOTIMPLEMENT
@@ -113,6 +120,11 @@ our @EXPORT = qw(
 	DKIM_FEATURE_ATPS
 
 	DKIM_SIGFLAG_IGNORE
+
+	DKIM_OP_GETOPT
+	DKIM_OP_SETOPT
+
+	DKIM_OPTS_TMPDIR
 );
 
 our $VERSION = '0.01';
@@ -239,7 +251,7 @@ sub dkim_getcachestats
 	return _dkim_getcachestats($$args{queries}, $$args{hits}, $$args{expired});
 }
 
-sub dkim_set_dns_callback()
+sub dkim_set_dns_callback
 {
 	my ($self, $args) = @_;
 
@@ -254,7 +266,7 @@ sub dkim_set_dns_callback()
 	return _dkim_set_dns_callback($self->{_dkimlib_handle}, $$args{func}, $$args{interval});
 }
 
-sub dkim_set_key_lookup()
+sub dkim_set_key_lookup
 {
 	my ($self, $args) = @_;
 
@@ -269,7 +281,7 @@ sub dkim_set_key_lookup()
 	return _dkim_set_key_lookup($self->{_dkimlib_handle}, $$args{func});
 }
 
-sub dkim_set_policy_lookup()
+sub dkim_set_policy_lookup
 {
 	my ($self, $args) = @_;
 
@@ -284,7 +296,7 @@ sub dkim_set_policy_lookup()
 	return _dkim_set_policy_lookup($self->{_dkimlib_handle}, $$args{func});
 }
 
-sub dkim_set_signature_handle()
+sub dkim_set_signature_handle
 {
 	my ($self, $args) = @_;
 
@@ -299,7 +311,7 @@ sub dkim_set_signature_handle()
 	return _dkim_set_signature_handle($self->{_dkimlib_handle}, $$args{func});
 }
 
-sub dkim_set_signature_handle_free()
+sub dkim_set_signature_handle_free
 {
 	my ($self, $args) = @_;
 
@@ -314,7 +326,7 @@ sub dkim_set_signature_handle_free()
 	return _dkim_set_signature_handle_free($self->{_dkimlib_handle}, $$args{func});
 }
 
-sub dkim_set_signature_tagvalues()
+sub dkim_set_signature_tagvalues
 {
 	my ($self, $args) = @_;
 
@@ -327,6 +339,21 @@ sub dkim_set_signature_tagvalues()
 	}
 
 	return _dkim_set_signature_tagvalues($self->{_dkimlib_handle}, $$args{func});
+}
+
+sub dkim_options
+{
+	my ($self, $args) = @_;
+
+	unless($self->{_dkimlib_handle}) {
+		throw Error::Simple('dkim_options called before dkim_sign/dkim_verify');
+	}
+	foreach(qw(op opt data len)) {
+		exists($$args{$_}) or throw Error::Simple("dkim_options missing argument '$_'");
+		defined($$args{$_}) or throw Error::Simple("dkim_options undefined argument '$_'");
+	}
+
+	return _dkim_options($self->{_dkimlib_handle}, $$args{op}, $$args{opt}, $$args{data}, $$args{len});
 }
 
 sub DESTROY
@@ -403,6 +430,8 @@ Static method.
 =head2 dkim_set_signature_handle_free
 
 =head2 dkim_set_signature_tagvalues
+
+=head2 dkim_options
 
 =head2 EXPORT
 

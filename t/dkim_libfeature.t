@@ -1,7 +1,6 @@
 #!/usr/bin/perl -wT
 
 use Test::More tests => 4;
-use Error qw(:try);
 BEGIN { use_ok('Mail::OpenDKIM') };
 
 #########################

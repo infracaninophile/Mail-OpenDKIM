@@ -444,7 +444,7 @@ sub dkim_get_reputation
 	return $rc;
 }
 
-sub dkim_set_final()
+sub dkim_set_final
 {
 	my ($self, $args) = @_;
 
@@ -459,7 +459,7 @@ sub dkim_set_final()
 	return Mail::OpenDKIM::_dkim_set_final($self->{_dkimlib_handle}, $$args{func});
 }
 
-sub dkim_set_prescreen()
+sub dkim_set_prescreen
 {
 	my ($self, $args) = @_;
 
@@ -485,7 +485,7 @@ sub dkim_getpartial
 	return Mail::OpenDKIM::_dkim_getpartial($self->{_dkim_handle});
 }
 
-sub dkim_setpartial()
+sub dkim_setpartial
 {
 	my ($self, $args) = @_;
 
@@ -626,6 +626,36 @@ sub dkim_policy_getdnssec
 	}
 
 	return Mail::OpenDKIM::_dkim_policy_getdnssec($self->{_dkim_handle});
+}
+
+sub dkim_policy_syntax
+{
+	my ($self, $args) = @_;
+
+	unless($self->{_dkim_handle}) {
+		throw Error::Simple('dkim_policy_syntax called before dkim_verify');
+	}
+	foreach(qw(str len)) {
+		exists($$args{$_}) or throw Error::Simple("dkim_policy_syntax missing argument '$_'");
+		defined($$args{$_}) or throw Error::Simple("dkim_policy_syntax undefined argument '$_'");
+	}
+
+	return Mail::OpenDKIM::_dkim_policy_syntax($self->{_dkim_handle}, $$args{str}, $$args{len});
+}
+
+sub dkim_sig_syntax
+{
+	my ($self, $args) = @_;
+
+	unless($self->{_dkim_handle}) {
+		throw Error::Simple('dkim_sig_syntax called before dkim_verify');
+	}
+	foreach(qw(str len)) {
+		exists($$args{$_}) or throw Error::Simple("dkim_sig_syntax missing argument '$_'");
+		defined($$args{$_}) or throw Error::Simple("dkim_sig_syntax undefined argument '$_'");
+	}
+
+	return Mail::OpenDKIM::_dkim_sig_syntax($self->{_dkim_handle}, $$args{str}, $$args{len});
 }
 
 sub dkim_getpresult
@@ -846,6 +876,22 @@ sub dkim_sig_process
 	}
 
 	return Mail::OpenDKIM::_dkim_sig_process($self->{_dkim_handle}, $$args{sig});
+}
+
+sub dkim_sig_gettagvalue
+{
+	my ($self, $args) = @_;
+
+	unless($self->{_dkim_handle}) {
+		throw Error::Simple('dkim_sig_gettagvalue called before dkim_verify');
+	}
+
+	foreach(qw(sig keytag tag)) {
+		exists($$args{$_}) or throw Error::Simple("dkim_sig_gettagvalue missing argument '$_'");
+		defined($$args{$_}) or throw Error::Simple("dkim_sig_gettagvalue undefined argument '$_'");
+	}
+
+	return Mail::OpenDKIM::_dkim_sig_gettagvalue($$args{sig}, $$args{keytag}, $$args{tag});
 }
 
 sub dkim_sig_hdrsigned
@@ -1090,6 +1136,8 @@ For internal use by Mail::OpenDKIM only - do not call directly
 
 The given value of pstate is ignored.
 The value sent to libOpenDKIM is always NULL.
+
+=head2 dkim_sig_syntax
 
 =head2 dkim_getpresult
 

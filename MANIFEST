@@ -30,12 +30,15 @@ t/dkim_getsignature.t
 t/dkim_getuser.t
 t/dkim_key_syntax.t
 t/dkim_libfeature.t
+t/dkim_mail_parse.t
 t/dkim_minbody.t
 t/dkim_ohdrs.t
+t/dkim_options.t
 t/dkim_policy.t
 t/dkim_policy_getdnssec.t
 t/dkim_policy_getreportinfo.t
 t/dkim_policy_state.t
+t/dkim_policy_syntax.t
 t/dkim_set_dns_callback.t
 t/dkim_set_final.t
 t/dkim_set_key_lookup.t
@@ -63,7 +66,9 @@ t/dkim_sig_getselector.t
 t/dkim_sig_getsignalg.t
 t/dkim_sig_getsignedhdrs.t
 t/dkim_sig_getsigntime.t
+t/dkim_sig_gettagvalue.t
 t/dkim_sig_process.t
+t/dkim_sig_syntax.t
 t/dkim_ssl_version.t
 t/manifest.t
 t/pod-coverage.t
