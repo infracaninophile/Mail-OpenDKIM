@@ -341,6 +341,66 @@ sub dkim_set_signature_tagvalues
 	return _dkim_set_signature_tagvalues($self->{_dkimlib_handle}, $$args{func});
 }
 
+sub dkim_dns_set_query_cancel
+{
+	my ($self, $args) = @_;
+
+	unless($self->{_dkimlib_handle}) {
+		throw Error::Simple('dkim_dns_set_query_cancel called before dkim_sign/dkim_verify');
+	}
+	foreach(qw(func)) {
+		exists($$args{$_}) or throw Error::Simple("dkim_dns_set_query_cancel missing argument '$_'");
+		defined($$args{$_}) or throw Error::Simple("dkim_dns_set_query_cancel undefined argument '$_'");
+	}
+
+	return _dkim_dns_set_query_cancel($self->{_dkimlib_handle}, $$args{func});
+}
+
+sub dkim_dns_set_query_service
+{
+	my ($self, $args) = @_;
+
+	unless($self->{_dkimlib_handle}) {
+		throw Error::Simple('dkim_dns_set_query_service called before dkim_sign/dkim_verify');
+	}
+	foreach(qw(func)) {
+		exists($$args{$_}) or throw Error::Simple("dkim_dns_set_query_service missing argument '$_'");
+		defined($$args{$_}) or throw Error::Simple("dkim_dns_set_query_service undefined argument '$_'");
+	}
+
+	return _dkim_dns_set_query_service($self->{_dkimlib_handle}, $$args{func});
+}
+
+sub dkim_dns_set_query_start
+{
+	my ($self, $args) = @_;
+
+	unless($self->{_dkimlib_handle}) {
+		throw Error::Simple('dkim_dns_set_query_start called before dkim_sign/dkim_verify');
+	}
+	foreach(qw(func)) {
+		exists($$args{$_}) or throw Error::Simple("dkim_dns_set_query_start missing argument '$_'");
+		defined($$args{$_}) or throw Error::Simple("dkim_dns_set_query_start undefined argument '$_'");
+	}
+
+	return _dkim_dns_set_query_start($self->{_dkimlib_handle}, $$args{func});
+}
+
+sub dkim_dns_set_query_waitreply
+{
+	my ($self, $args) = @_;
+
+	unless($self->{_dkimlib_handle}) {
+		throw Error::Simple('dkim_dns_set_query_waitreply called before dkim_sign/dkim_verify');
+	}
+	foreach(qw(func)) {
+		exists($$args{$_}) or throw Error::Simple("dkim_dns_set_query_waitreply missing argument '$_'");
+		defined($$args{$_}) or throw Error::Simple("dkim_dns_set_query_waitreply undefined argument '$_'");
+	}
+
+	return _dkim_dns_set_query_waitreply($self->{_dkimlib_handle}, $$args{func});
+}
+
 sub dkim_options
 {
 	my ($self, $args) = @_;

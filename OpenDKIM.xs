@@ -17,6 +17,10 @@ static SV *prescreen_callback = (SV *)NULL;
 static SV *signature_handle_callback = (SV *)NULL;
 static SV *signature_handle_free_callback = (SV *)NULL;
 static SV *signature_tagvalues_callback = (SV *)NULL;
+static SV *dns_query_cancel_callback = (SV *)NULL;
+static SV *dns_query_service_callback = (SV *)NULL;
+static SV *dns_query_start_callback = (SV *)NULL;
+static SV *dns_query_waitreply_callback = (SV *)NULL;
 
 /*
  * dkim.h doesn't specify the contents of the DKIM and DKIM_SIGINFO structures, it just
@@ -325,6 +329,156 @@ call_signature_tagvalues_callback(void *user, dkim_param_t pcode, const unsigned
 	call_sv(sv, G_DISCARD);
 }
 
+/*
+ * called when the OpenDKIMlibrary wants to call the callback function provided to
+ * dkim_set_query_cancel
+ */
+static int *
+call_dns_query_cancel_callback(void *a, void *b)
+{
+	dSP;
+	int count, *ret;
+	SV *sv = dns_query_cancel_callback;
+
+	if(sv == NULL) {
+		croak("Internal error: call_dns_query_cancel called, but nothing to call");
+		return;
+	}
+
+	PUSHMARK(SP);
+	XPUSHs(sv_2mortal(newSVpv(a, sizeof(void *))));
+	XPUSHs(sv_2mortal(newSVpv(b, sizeof(void *))));
+	PUTBACK;
+
+	count = call_sv(sv, G_SCALAR);
+
+	SPAGAIN;
+
+	if(count != 1) {
+		croak("Internal error: dns_query_cancel_callback routine returned %d items, 1 was expected",
+			count);
+		return NULL;
+	}
+
+	ret = (int *)POPp;
+
+	PUTBACK;
+	FREETMPS;
+	LEAVE;
+
+	return ret;
+}
+
+/*
+ * called when the OpenDKIMlibrary wants to call the callback function provided to
+ * dkim_set_query_service
+ */
+static void
+call_dns_query_service_callback(void *service)
+{
+	dSP;
+	SV *sv = dns_query_service_callback;
+
+	if(sv == NULL) {
+		croak("Internal error: call_dns_query_service called, but nothing to call");
+		return;
+	}
+
+	PUSHMARK(SP);
+	XPUSHs(sv_2mortal(newSVpv(service, sizeof(void *))));
+	PUTBACK;
+
+	call_sv(sv, G_DISCARD);
+}
+
+/*
+ * called when the OpenDKIMlibrary wants to call the callback function provided to
+ * dkim_set_query_start
+ */
+static int *
+call_dns_query_start_callback(void *a, int b, unsigned char *c, unsigned char *d, size_t e, void **f)
+{
+	dSP;
+	int count, *ret;
+	SV *sv = dns_query_start_callback;
+
+	if(sv == NULL) {
+		croak("Internal error: call_dns_query_service called, but nothing to call");
+		return;
+	}
+
+	PUSHMARK(SP);
+	XPUSHs(sv_2mortal(newSVpv(a, sizeof(void *))));
+	XPUSHs(sv_2mortal(newSViv(b)));
+	XPUSHs(sv_2mortal(newSVpv(c, 0)));
+	XPUSHs(sv_2mortal(newSVpv(d, e + 1)));
+	XPUSHs(sv_2mortal(newSViv(e)));
+	XPUSHs(sv_2mortal(newSVpv((void *)f, sizeof(void **))));
+	PUTBACK;
+
+	count = call_sv(sv, G_SCALAR);
+
+	SPAGAIN;
+
+	if(count != 1) {
+		croak("Internal error: dns_query_start_callback routine returned %d items, 1 was expected",
+			count);
+		return NULL;
+	}
+
+	ret = (int *)POPp;
+
+	PUTBACK;
+	FREETMPS;
+	LEAVE;
+
+	return ret;
+}
+
+/*
+ * called when the OpenDKIMlibrary wants to call the callback function provided to
+ * dkim_dns_set_query_waitreply
+ */
+static int *
+call_dns_query_waitreply_callback(void *a, void *b, struct timeval *c, size_t *d, int *e, int *f)
+{
+	dSP;
+	int count, *ret;
+	SV *sv = dns_query_start_callback;
+
+	if(sv == NULL) {
+		croak("Internal error: call_dns_query_service called, but nothing to call");
+		return;
+	}
+
+	PUSHMARK(SP);
+	XPUSHs(sv_2mortal(newSVpv(a, sizeof(void *))));
+	XPUSHs(sv_2mortal(newSVpv(b, sizeof(void *))));
+	XPUSHs(sv_2mortal(newSVpv((void *)c, sizeof(struct timeval))));
+	XPUSHs(sv_2mortal(newSVpv((void *)d, sizeof(size_t))));
+	XPUSHs(sv_2mortal(newSVpv((void *)e, sizeof(int))));
+	XPUSHs(sv_2mortal(newSVpv((void *)f, sizeof(int))));
+	PUTBACK;
+
+	count = call_sv(sv, G_SCALAR);
+
+	SPAGAIN;
+
+	if(count != 1) {
+		croak("Internal error: dns_query_waitreply_callback routine returned %d items, 1 was expected",
+			count);
+		return NULL;
+	}
+
+	ret = (int *)POPp;
+
+	PUTBACK;
+	FREETMPS;
+	LEAVE;
+
+	return ret;
+}
+
 MODULE = Mail::OpenDKIM		PACKAGE = Mail::OpenDKIM
 PROTOTYPES: DISABLE
 
@@ -585,6 +739,54 @@ _dkim_set_signature_tagvalues(libopendkim, func)
 		RETVAL = dkim_set_signature_tagvalues(libopendkim, call_signature_tagvalues_callback);
 	OUTPUT:
 		RETVAL
+
+void
+_dkim_dns_set_query_cancel(libopendkim, func)
+		DKIM_LIB *libopendkim
+		SV *func
+	CODE:
+		if(dns_query_cancel_callback == (SV *)NULL)
+			dns_query_cancel_callback = newSVsv(func);
+		else
+			SvSetSV(dns_query_cancel_callback, func);
+
+		dkim_dns_set_query_cancel(libopendkim, call_dns_query_cancel_callback);
+
+void
+_dkim_dns_set_query_service(libopendkim, func)
+		DKIM_LIB *libopendkim
+		SV *func
+	CODE:
+		if(dns_query_service_callback == (SV *)NULL)
+			dns_query_service_callback = newSVsv(func);
+		else
+			SvSetSV(dns_query_service_callback, func);
+
+		dkim_dns_set_query_service(libopendkim, call_dns_query_service_callback);
+
+void
+_dkim_dns_set_query_start(libopendkim, func)
+		DKIM_LIB *libopendkim
+		SV *func
+	CODE:
+		if(dns_query_start_callback == (SV *)NULL)
+			dns_query_start_callback = newSVsv(func);
+		else
+			SvSetSV(dns_query_start_callback, func);
+
+		dkim_dns_set_query_start(libopendkim, call_dns_query_start_callback);
+
+void
+_dkim_dns_set_query_waitreply(libopendkim, func)
+		DKIM_LIB *libopendkim
+		SV *func
+	CODE:
+		if(dns_query_waitreply_callback == (SV *)NULL)
+			dns_query_waitreply_callback = newSVsv(func);
+		else
+			SvSetSV(dns_query_waitreply_callback, func);
+
+		dkim_dns_set_query_waitreply(libopendkim, call_dns_query_waitreply_callback);
 
 DKIM_STAT
 _dkim_free(d)
