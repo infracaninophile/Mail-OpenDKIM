@@ -6,8 +6,10 @@ ppport.h
 README
 lib/Mail/OpenDKIM.pm
 lib/Mail/OpenDKIM/DKIM.pm
+lib/Mail/OpenDKIM/PrivateKey.pm
 typemap
 t/00-load.t
+t/Mail-OpenDKIM-PrivateKey.t
 t/boilerplate.t
 t/dkim_atps_check.t
 t/dkim_diffheaders.t
