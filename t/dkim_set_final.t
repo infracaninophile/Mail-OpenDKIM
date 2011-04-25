@@ -12,7 +12,7 @@ sub callback {
 	die("callback called unexpectedly, nsigs $nsigs");
 }
 
-FLUSH_CACHE: {
+SET_FINAL: {
 
 	my $o = new_ok('Mail::OpenDKIM');
 	ok($o->dkim_init());

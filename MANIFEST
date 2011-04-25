@@ -11,6 +11,10 @@ t/00-load.t
 t/boilerplate.t
 t/dkim_atps_check.t
 t/dkim_diffheaders.t
+t/dkim_dns_set_query_cancel.t
+t/dkim_dns_set_query_service.t
+t/dkim_dns_set_query_start.t
+t/dkim_dns_set_query_waitreply.t
 t/dkim_flush_cache.t
 t/dkim_get_reputation.t
 t/dkim_get_signer.t
