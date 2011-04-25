@@ -2,7 +2,7 @@
 
 use strict;
 use warnings;
-use Test::More tests => 5;
+use Test::More tests => 6;
 
 sub not_in_file_ok {
     my ($filename, %regex) = @_;
@@ -51,6 +51,7 @@ TODO: {
   module_boilerplate_ok('lib/Mail/OpenDKIM.pm');
   module_boilerplate_ok('lib/Mail/OpenDKIM/DKIM.pm');
   module_boilerplate_ok('lib/Mail/OpenDKIM/PrivateKey.pm');
+  module_boilerplate_ok('lib/Mail/OpenDKIM/Signer.pm');
 
 
 }

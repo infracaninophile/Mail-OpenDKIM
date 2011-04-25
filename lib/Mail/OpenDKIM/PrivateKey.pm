@@ -57,6 +57,12 @@ sub load
 	return $self;
 }
 
+sub data {
+	my $self = shift;
+
+	return $self->{_data};
+}
+
 1;
 __END__
 # Below is stub documentation for your module. You'd better edit it!
@@ -83,6 +89,8 @@ Blah blah blah.
 None by default.
 
 =head2 load
+
+=head2 data
 
 
 
