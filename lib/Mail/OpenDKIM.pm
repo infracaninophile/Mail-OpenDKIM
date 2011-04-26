@@ -13,21 +13,21 @@ our @ISA = qw(Exporter);
 # names by default without a very good reason. Use EXPORT_OK instead.
 # Do not simply export all your public functions/methods/constants.
 
-# This allows declaration	use Mail::OpenDKIM ':all';
+# This allows declaration  use Mail::OpenDKIM ':all';
 # If you do not need this, moving things directly into @EXPORT or @EXPORT_OK
 # will save memory.
 our %EXPORT_TAGS = ( 'all' => [ qw(
 
 ) ] );
 
-use constant DKIM_CANON_SIMPLE => 0;	# RFC4871
-use constant DKIM_CANON_RELAXED => 1;	# RFC4871
+use constant DKIM_CANON_SIMPLE => 0;  # RFC4871
+use constant DKIM_CANON_RELAXED => 1;  # RFC4871
 use constant DKIM_CANON_DEFAULT => DKIM_CANON_SIMPLE;
 
 use constant DKIM_SIGN_RSASHA1 => 0;
 use constant DKIM_SIGN_RSASHA256 => 1;
 
-use constant DKIM_STAT_OK => 0;	# dkim.h
+use constant DKIM_STAT_OK => 0;  # dkim.h
 use constant DKIM_STAT_BADSIG => 1;
 use constant DKIM_STAT_NOSIG => 2;
 use constant DKIM_STAT_CANTVRFY => 4;
@@ -75,56 +75,56 @@ use constant DKIM_OPTS_TMPDIR => 1;
 our @EXPORT_OK = ( @{ $EXPORT_TAGS{'all'} } );
 
 our @EXPORT = qw(
-	DKIM_CANON_RELAXED
-	DKIM_CANON_SIMPLE
+  DKIM_CANON_RELAXED
+  DKIM_CANON_SIMPLE
 
-	DKIM_SIGN_RSASHA1
-	DKIM_SIGN_RSASHA256
+  DKIM_SIGN_RSASHA1
+  DKIM_SIGN_RSASHA256
 
-	DKIM_STAT_OK
-	DKIM_STAT_BADSIG
-	DKIM_STAT_NOSIG
-	DKIM_STAT_CANTVRFY
-	DKIM_STAT_SYNTAX
-	DKIM_STAT_NORESOURCE
-	DKIM_STAT_INVALID
-	DKIM_STAT_NOTIMPLEMENT
+  DKIM_STAT_OK
+  DKIM_STAT_BADSIG
+  DKIM_STAT_NOSIG
+  DKIM_STAT_CANTVRFY
+  DKIM_STAT_SYNTAX
+  DKIM_STAT_NORESOURCE
+  DKIM_STAT_INVALID
+  DKIM_STAT_NOTIMPLEMENT
 
-	DKIM_MODE_UNKNOWN
-	DKIM_MODE_SIGN
-	DKIM_MODE_VERIFY
+  DKIM_MODE_UNKNOWN
+  DKIM_MODE_SIGN
+  DKIM_MODE_VERIFY
 
-	DKIM_POLICY_NONE
-	DKIM_POLICY_UNKNOWN
-	DKIM_POLICY_ALL
-	DKIM_POLICY_DISCARDABLE
+  DKIM_POLICY_NONE
+  DKIM_POLICY_UNKNOWN
+  DKIM_POLICY_ALL
+  DKIM_POLICY_DISCARDABLE
 
-	DKIM_DNSSEC_UNKNOWN
+  DKIM_DNSSEC_UNKNOWN
 
-	DKIM_SIGBH_MATCH
+  DKIM_SIGBH_MATCH
 
-	DKIM_SIGERROR_VERSION
+  DKIM_SIGERROR_VERSION
 
-	DKIM_PRESULT_NONE
-	DKIM_PRESULT_NXDOMAIN
-	DKIM_PRESULT_FOUND
+  DKIM_PRESULT_NONE
+  DKIM_PRESULT_NXDOMAIN
+  DKIM_PRESULT_FOUND
 
-	DKIM_FEATURE_DIFFHEADERS
-	DKIM_FEATURE_DKIM_REPUTATION
-	DKIM_FEATURE_PARSE_TIME
-	DKIM_FEATURE_QUERY_CACHE
-	DKIM_FEATURE_SHA256
-	DKIM_FEATURE_OVERSIGN
-	DKIM_FEATURE_DNSSEC
-	DKIM_FEATURE_RESIGN
-	DKIM_FEATURE_ATPS
+  DKIM_FEATURE_DIFFHEADERS
+  DKIM_FEATURE_DKIM_REPUTATION
+  DKIM_FEATURE_PARSE_TIME
+  DKIM_FEATURE_QUERY_CACHE
+  DKIM_FEATURE_SHA256
+  DKIM_FEATURE_OVERSIGN
+  DKIM_FEATURE_DNSSEC
+  DKIM_FEATURE_RESIGN
+  DKIM_FEATURE_ATPS
 
-	DKIM_SIGFLAG_IGNORE
+  DKIM_SIGFLAG_IGNORE
 
-	DKIM_OP_GETOPT
-	DKIM_OP_SETOPT
+  DKIM_OP_GETOPT
+  DKIM_OP_SETOPT
 
-	DKIM_OPTS_TMPDIR
+  DKIM_OPTS_TMPDIR
 );
 
 use vars qw($VERSION);
@@ -144,21 +144,21 @@ Mail::OpenDKIM - Provides an interface to libOpenDKIM
 
   # create a signer object
   my $dkim = Mail::OpenDKIM::Signer->new(
-  	Algorithm => 'rsa-sha1',
-	Method => 'relaxed',
-	Domain => 'example.org',
-	Selector => 'selector1',
-	KeyFile => 'private.key',
+    Algorithm => 'rsa-sha1',
+  Method => 'relaxed',
+  Domain => 'example.org',
+  Selector => 'selector1',
+  KeyFile => 'private.key',
   );
 
   # read an email and pass it into the signer, one line at a time
   while(<STDIN>) {
-  	# remove local line terminators
-	chomp;
-	s/\015$//;
+    # remove local line terminators
+  chomp;
+  s/\015$//;
 
-	# use SMTP line terminators
-	$dkim->PRINT("$_\015\012");
+  # use SMTP line terminators
+  $dkim->PRINT("$_\015\012");
   }
   $dkim->CLOSE();
 
@@ -176,24 +176,27 @@ argument have been implemented in Mail::OpenDKIM::DKIM.
 Mail::OpenDKIM::Signer provides a drop in replacement for the signature process provided by
 Mail::DKIM::Signer.
 
+When an error is encountered, an Error::Simple object is thrown.
+
 =head1 SUBROUTINES/METHODS
 
 =head2 new
 
 Create a new signing/verifying object.
+After doing this you will need to call the dkim_init method before you can do much else.
 
 =cut
 
 sub new {
-	my $class = shift;
+  my $class = shift;
 
-	my $self = {
-		_dkimlib_handle => undef,	# DKIM_LIB
-	};
+  my $self = {
+    _dkimlib_handle => undef,  # DKIM_LIB
+  };
 
-	bless $self, $class;
+  bless $self, $class;
 
-	return $self;
+  return $self;
 }
 
 =head2 dkim_init
@@ -204,17 +207,17 @@ For further information, refer to http://www.opendkim.org/libopendkim/
 
 sub dkim_init
 {
-	my $self = shift;
+  my $self = shift;
 
-	if($self->{_dkimlib_handle}) {
-		throw Error::Simple('dkim_init called more than once');
-	}
-	$self->{_dkimlib_handle} = _dkim_init();
-	unless($self->{_dkimlib_handle}) {
-		throw Error::Simple('dkim_init failed to create a handle');
-	}
+  if($self->{_dkimlib_handle}) {
+    throw Error::Simple('dkim_init called more than once');
+  }
+  $self->{_dkimlib_handle} = _dkim_init();
+  unless($self->{_dkimlib_handle}) {
+    throw Error::Simple('dkim_init failed to create a handle');
+  }
 
-	return $self;
+  return $self;
 }
 
 =head2 dkim_close
@@ -225,13 +228,13 @@ For further information, refer to http://www.opendkim.org/libopendkim/
 
 sub dkim_close
 {
-	my $self = shift;
+  my $self = shift;
 
-	unless($self->{_dkimlib_handle}) {
-		throw Error::Simple('dkim_close called before dkim_init');
-	}
-	_dkim_close($self->{_dkimlib_handle});
-	$self->{_dkimlib_handle} = undef;
+  unless($self->{_dkimlib_handle}) {
+    throw Error::Simple('dkim_close called before dkim_init');
+  }
+  _dkim_close($self->{_dkimlib_handle});
+  $self->{_dkimlib_handle} = undef;
 }
 
 =head2 dkim_flush_cache
@@ -242,12 +245,12 @@ For further information, refer to http://www.opendkim.org/libopendkim/
 
 sub dkim_flush_cache
 {
-	my $self = shift;
+  my $self = shift;
 
-	unless($self->{_dkimlib_handle}) {
-		throw Error::Simple('dkim_flush_cache called before dkim_init');
-	}
-	return _dkim_flush_cache($self->{_dkimlib_handle});
+  unless($self->{_dkimlib_handle}) {
+    throw Error::Simple('dkim_flush_cache called before dkim_init');
+  }
+  return _dkim_flush_cache($self->{_dkimlib_handle});
 }
 
 =head2 dkim_libfeature
@@ -258,17 +261,17 @@ For further information, refer to http://www.opendkim.org/libopendkim/
 
 sub dkim_libfeature
 {
-	my ($self, $args) = @_;
+  my ($self, $args) = @_;
 
-	unless($self->{_dkimlib_handle}) {
-		throw Error::Simple('dkim_libfeature called before dkim_init');
-	}
-	foreach(qw(feature)) {
-		exists($$args{$_}) or throw Error::Simple("dkim_libfeature missing argument '$_'");
-		defined($$args{$_}) or throw Error::Simple("dkim_libfeature undefined argument '$_'");
-	}
+  unless($self->{_dkimlib_handle}) {
+    throw Error::Simple('dkim_libfeature called before dkim_init');
+  }
+  foreach(qw(feature)) {
+    exists($$args{$_}) or throw Error::Simple("dkim_libfeature missing argument '$_'");
+    defined($$args{$_}) or throw Error::Simple("dkim_libfeature undefined argument '$_'");
+  }
 
-	return _dkim_libfeature($self->{_dkimlib_handle}, $$args{feature});
+  return _dkim_libfeature($self->{_dkimlib_handle}, $$args{feature});
 }
 
 =head2 dkim_sign
@@ -281,26 +284,26 @@ Returns a Mail::OpenDKIM::DKIM object.
 
 sub dkim_sign
 {
-	my ($self, $args) = @_;
+  my ($self, $args) = @_;
 
-	unless($self->{_dkimlib_handle}) {
-		throw Error::Simple('dkim_sign called before dkim_init');
-	}
-	foreach(qw(id secretkey selector domain hdrcanon_alg bodycanon_alg sign_alg length)) {
-		exists($$args{$_}) or throw Error::Simple("dkim_sign missing argument '$_'");
-		defined($$args{$_}) or throw Error::Simple("dkim_sign undefined argument '$_'");
-	}
-	require Mail::OpenDKIM::DKIM;
+  unless($self->{_dkimlib_handle}) {
+    throw Error::Simple('dkim_sign called before dkim_init');
+  }
+  foreach(qw(id secretkey selector domain hdrcanon_alg bodycanon_alg sign_alg length)) {
+    exists($$args{$_}) or throw Error::Simple("dkim_sign missing argument '$_'");
+    defined($$args{$_}) or throw Error::Simple("dkim_sign undefined argument '$_'");
+  }
+  require Mail::OpenDKIM::DKIM;
 
-	my $dkim = Mail::OpenDKIM::DKIM->new({ dkimlib_handle => $self->{_dkimlib_handle} });
+  my $dkim = Mail::OpenDKIM::DKIM->new({ dkimlib_handle => $self->{_dkimlib_handle} });
 
-	my $statp = $dkim->dkim_sign($args);
+  my $statp = $dkim->dkim_sign($args);
 
-	unless($statp == DKIM_STAT_OK) {
-		throw Error::Simple("dkim_sign failed with status $statp");
-	}
+  unless($statp == DKIM_STAT_OK) {
+    throw Error::Simple("dkim_sign failed with status $statp");
+  }
 
-	return $dkim;
+  return $dkim;
 }
 
 =head2 dkim_verify
@@ -314,26 +317,26 @@ The memclosure argument is ignored.
 
 sub dkim_verify
 {
-	my ($self, $args) = @_;
+  my ($self, $args) = @_;
 
-	unless($self->{_dkimlib_handle}) {
-		throw Error::Simple('dkim_verify called before dkim_init');
-	}
-	foreach(qw(id)) {
-		exists($$args{$_}) or throw Error::Simple("dkim_verify missing argument '$_'");
-		defined($$args{$_}) or throw Error::Simple("dkim_verify undefined argument '$_'");
-	}
-	require Mail::OpenDKIM::DKIM;
+  unless($self->{_dkimlib_handle}) {
+    throw Error::Simple('dkim_verify called before dkim_init');
+  }
+  foreach(qw(id)) {
+    exists($$args{$_}) or throw Error::Simple("dkim_verify missing argument '$_'");
+    defined($$args{$_}) or throw Error::Simple("dkim_verify undefined argument '$_'");
+  }
+  require Mail::OpenDKIM::DKIM;
 
-	my $dkim = Mail::OpenDKIM::DKIM->new({ dkimlib_handle => $self->{_dkimlib_handle} });
+  my $dkim = Mail::OpenDKIM::DKIM->new({ dkimlib_handle => $self->{_dkimlib_handle} });
 
-	my $statp = $dkim->dkim_verify($args);
+  my $statp = $dkim->dkim_verify($args);
 
-	unless($statp == DKIM_STAT_OK) {
-		throw Error::Simple("dkim_verify failed with status $statp");
-	}
+  unless($statp == DKIM_STAT_OK) {
+    throw Error::Simple("dkim_verify failed with status $statp");
+  }
 
-	return $dkim;
+  return $dkim;
 }
 
 =head2 dkim_getcachestats
@@ -344,9 +347,9 @@ For further information, refer to http://www.opendkim.org/libopendkim/
 
 sub dkim_getcachestats
 {
-	my ($self, $args) = @_;
+  my ($self, $args) = @_;
 
-	return _dkim_getcachestats($$args{queries}, $$args{hits}, $$args{expired});
+  return _dkim_getcachestats($$args{queries}, $$args{hits}, $$args{expired});
 }
 
 =head2 dkim_set_dns_callback
@@ -357,17 +360,17 @@ For further information, refer to http://www.opendkim.org/libopendkim/
 
 sub dkim_set_dns_callback
 {
-	my ($self, $args) = @_;
+  my ($self, $args) = @_;
 
-	unless($self->{_dkimlib_handle}) {
-		throw Error::Simple('dkim_set_dns_callback called before dkim_init');
-	}
-	foreach(qw(func interval)) {
-		exists($$args{$_}) or throw Error::Simple("dkim_set_dns_callback missing argument '$_'");
-		defined($$args{$_}) or throw Error::Simple("dkim_set_dns_callback undefined argument '$_'");
-	}
+  unless($self->{_dkimlib_handle}) {
+    throw Error::Simple('dkim_set_dns_callback called before dkim_init');
+  }
+  foreach(qw(func interval)) {
+    exists($$args{$_}) or throw Error::Simple("dkim_set_dns_callback missing argument '$_'");
+    defined($$args{$_}) or throw Error::Simple("dkim_set_dns_callback undefined argument '$_'");
+  }
 
-	return _dkim_set_dns_callback($self->{_dkimlib_handle}, $$args{func}, $$args{interval});
+  return _dkim_set_dns_callback($self->{_dkimlib_handle}, $$args{func}, $$args{interval});
 }
 
 =head2 dkim_set_key_lookup
@@ -378,17 +381,17 @@ For further information, refer to http://www.opendkim.org/libopendkim/
 
 sub dkim_set_key_lookup
 {
-	my ($self, $args) = @_;
+  my ($self, $args) = @_;
 
-	unless($self->{_dkimlib_handle}) {
-		throw Error::Simple('dkim_set_key_lookup called before dkim_sign/dkim_verify');
-	}
-	foreach(qw(func)) {
-		exists($$args{$_}) or throw Error::Simple("dkim_set_key_lookup missing argument '$_'");
-		defined($$args{$_}) or throw Error::Simple("dkim_set_key_lookup undefined argument '$_'");
-	}
+  unless($self->{_dkimlib_handle}) {
+    throw Error::Simple('dkim_set_key_lookup called before dkim_sign/dkim_verify');
+  }
+  foreach(qw(func)) {
+    exists($$args{$_}) or throw Error::Simple("dkim_set_key_lookup missing argument '$_'");
+    defined($$args{$_}) or throw Error::Simple("dkim_set_key_lookup undefined argument '$_'");
+  }
 
-	return _dkim_set_key_lookup($self->{_dkimlib_handle}, $$args{func});
+  return _dkim_set_key_lookup($self->{_dkimlib_handle}, $$args{func});
 }
 
 =head2 dkim_set_policy_lookup
@@ -399,17 +402,17 @@ For further information, refer to http://www.opendkim.org/libopendkim/
 
 sub dkim_set_policy_lookup
 {
-	my ($self, $args) = @_;
+  my ($self, $args) = @_;
 
-	unless($self->{_dkimlib_handle}) {
-		throw Error::Simple('dkim_set_policy_lookup called before dkim_sign/dkim_verify');
-	}
-	foreach(qw(func)) {
-		exists($$args{$_}) or throw Error::Simple("dkim_set_policy_lookup missing argument '$_'");
-		defined($$args{$_}) or throw Error::Simple("dkim_set_policy_lookup undefined argument '$_'");
-	}
+  unless($self->{_dkimlib_handle}) {
+    throw Error::Simple('dkim_set_policy_lookup called before dkim_sign/dkim_verify');
+  }
+  foreach(qw(func)) {
+    exists($$args{$_}) or throw Error::Simple("dkim_set_policy_lookup missing argument '$_'");
+    defined($$args{$_}) or throw Error::Simple("dkim_set_policy_lookup undefined argument '$_'");
+  }
 
-	return _dkim_set_policy_lookup($self->{_dkimlib_handle}, $$args{func});
+  return _dkim_set_policy_lookup($self->{_dkimlib_handle}, $$args{func});
 }
 
 =head2 dkim_set_signature_handle
@@ -420,17 +423,17 @@ For further information, refer to http://www.opendkim.org/libopendkim/
 
 sub dkim_set_signature_handle
 {
-	my ($self, $args) = @_;
+  my ($self, $args) = @_;
 
-	unless($self->{_dkimlib_handle}) {
-		throw Error::Simple('dkim_set_signature_handle called before dkim_sign/dkim_verify');
-	}
-	foreach(qw(func)) {
-		exists($$args{$_}) or throw Error::Simple("dkim_set_signature_handle missing argument '$_'");
-		defined($$args{$_}) or throw Error::Simple("dkim_set_signature_handle undefined argument '$_'");
-	}
+  unless($self->{_dkimlib_handle}) {
+    throw Error::Simple('dkim_set_signature_handle called before dkim_sign/dkim_verify');
+  }
+  foreach(qw(func)) {
+    exists($$args{$_}) or throw Error::Simple("dkim_set_signature_handle missing argument '$_'");
+    defined($$args{$_}) or throw Error::Simple("dkim_set_signature_handle undefined argument '$_'");
+  }
 
-	return _dkim_set_signature_handle($self->{_dkimlib_handle}, $$args{func});
+  return _dkim_set_signature_handle($self->{_dkimlib_handle}, $$args{func});
 }
 
 =head2 dkim_set_signature_handle_free
@@ -441,17 +444,17 @@ For further information, refer to http://www.opendkim.org/libopendkim/
 
 sub dkim_set_signature_handle_free
 {
-	my ($self, $args) = @_;
+  my ($self, $args) = @_;
 
-	unless($self->{_dkimlib_handle}) {
-		throw Error::Simple('dkim_set_signature_handle_free called before dkim_sign/dkim_verify');
-	}
-	foreach(qw(func)) {
-		exists($$args{$_}) or throw Error::Simple("dkim_set_signature_handle_free missing argument '$_'");
-		defined($$args{$_}) or throw Error::Simple("dkim_set_signature_handle_free undefined argument '$_'");
-	}
+  unless($self->{_dkimlib_handle}) {
+    throw Error::Simple('dkim_set_signature_handle_free called before dkim_sign/dkim_verify');
+  }
+  foreach(qw(func)) {
+    exists($$args{$_}) or throw Error::Simple("dkim_set_signature_handle_free missing argument '$_'");
+    defined($$args{$_}) or throw Error::Simple("dkim_set_signature_handle_free undefined argument '$_'");
+  }
 
-	return _dkim_set_signature_handle_free($self->{_dkimlib_handle}, $$args{func});
+  return _dkim_set_signature_handle_free($self->{_dkimlib_handle}, $$args{func});
 }
 
 =head2 dkim_set_signature_tagvalues
@@ -462,17 +465,17 @@ For further information, refer to http://www.opendkim.org/libopendkim/
 
 sub dkim_set_signature_tagvalues
 {
-	my ($self, $args) = @_;
+  my ($self, $args) = @_;
 
-	unless($self->{_dkimlib_handle}) {
-		throw Error::Simple('dkim_set_signature_tagvalues called before dkim_sign/dkim_verify');
-	}
-	foreach(qw(func)) {
-		exists($$args{$_}) or throw Error::Simple("dkim_set_signature_tagvalues missing argument '$_'");
-		defined($$args{$_}) or throw Error::Simple("dkim_set_signature_tagvalues undefined argument '$_'");
-	}
+  unless($self->{_dkimlib_handle}) {
+    throw Error::Simple('dkim_set_signature_tagvalues called before dkim_sign/dkim_verify');
+  }
+  foreach(qw(func)) {
+    exists($$args{$_}) or throw Error::Simple("dkim_set_signature_tagvalues missing argument '$_'");
+    defined($$args{$_}) or throw Error::Simple("dkim_set_signature_tagvalues undefined argument '$_'");
+  }
 
-	return _dkim_set_signature_tagvalues($self->{_dkimlib_handle}, $$args{func});
+  return _dkim_set_signature_tagvalues($self->{_dkimlib_handle}, $$args{func});
 }
 
 =head2 dkim_dns_set_query_cancel
@@ -483,17 +486,17 @@ For further information, refer to http://www.opendkim.org/libopendkim/
 
 sub dkim_dns_set_query_cancel
 {
-	my ($self, $args) = @_;
+  my ($self, $args) = @_;
 
-	unless($self->{_dkimlib_handle}) {
-		throw Error::Simple('dkim_dns_set_query_cancel called before dkim_sign/dkim_verify');
-	}
-	foreach(qw(func)) {
-		exists($$args{$_}) or throw Error::Simple("dkim_dns_set_query_cancel missing argument '$_'");
-		defined($$args{$_}) or throw Error::Simple("dkim_dns_set_query_cancel undefined argument '$_'");
-	}
+  unless($self->{_dkimlib_handle}) {
+    throw Error::Simple('dkim_dns_set_query_cancel called before dkim_sign/dkim_verify');
+  }
+  foreach(qw(func)) {
+    exists($$args{$_}) or throw Error::Simple("dkim_dns_set_query_cancel missing argument '$_'");
+    defined($$args{$_}) or throw Error::Simple("dkim_dns_set_query_cancel undefined argument '$_'");
+  }
 
-	return _dkim_dns_set_query_cancel($self->{_dkimlib_handle}, $$args{func});
+  return _dkim_dns_set_query_cancel($self->{_dkimlib_handle}, $$args{func});
 }
 
 =head2 dkim_dns_set_query_service
@@ -504,17 +507,17 @@ For further information, refer to http://www.opendkim.org/libopendkim/
 
 sub dkim_dns_set_query_service
 {
-	my ($self, $args) = @_;
+  my ($self, $args) = @_;
 
-	unless($self->{_dkimlib_handle}) {
-		throw Error::Simple('dkim_dns_set_query_service called before dkim_sign/dkim_verify');
-	}
-	foreach(qw(func)) {
-		exists($$args{$_}) or throw Error::Simple("dkim_dns_set_query_service missing argument '$_'");
-		defined($$args{$_}) or throw Error::Simple("dkim_dns_set_query_service undefined argument '$_'");
-	}
+  unless($self->{_dkimlib_handle}) {
+    throw Error::Simple('dkim_dns_set_query_service called before dkim_sign/dkim_verify');
+  }
+  foreach(qw(func)) {
+    exists($$args{$_}) or throw Error::Simple("dkim_dns_set_query_service missing argument '$_'");
+    defined($$args{$_}) or throw Error::Simple("dkim_dns_set_query_service undefined argument '$_'");
+  }
 
-	return _dkim_dns_set_query_service($self->{_dkimlib_handle}, $$args{func});
+  return _dkim_dns_set_query_service($self->{_dkimlib_handle}, $$args{func});
 }
 
 =head2 dkim_dns_set_query_start
@@ -525,17 +528,17 @@ For further information, refer to http://www.opendkim.org/libopendkim/
 
 sub dkim_dns_set_query_start
 {
-	my ($self, $args) = @_;
+  my ($self, $args) = @_;
 
-	unless($self->{_dkimlib_handle}) {
-		throw Error::Simple('dkim_dns_set_query_start called before dkim_sign/dkim_verify');
-	}
-	foreach(qw(func)) {
-		exists($$args{$_}) or throw Error::Simple("dkim_dns_set_query_start missing argument '$_'");
-		defined($$args{$_}) or throw Error::Simple("dkim_dns_set_query_start undefined argument '$_'");
-	}
+  unless($self->{_dkimlib_handle}) {
+    throw Error::Simple('dkim_dns_set_query_start called before dkim_sign/dkim_verify');
+  }
+  foreach(qw(func)) {
+    exists($$args{$_}) or throw Error::Simple("dkim_dns_set_query_start missing argument '$_'");
+    defined($$args{$_}) or throw Error::Simple("dkim_dns_set_query_start undefined argument '$_'");
+  }
 
-	return _dkim_dns_set_query_start($self->{_dkimlib_handle}, $$args{func});
+  return _dkim_dns_set_query_start($self->{_dkimlib_handle}, $$args{func});
 }
 
 =head2 dkim_dns_set_query_waitreply
@@ -546,17 +549,17 @@ For further information, refer to http://www.opendkim.org/libopendkim/
 
 sub dkim_dns_set_query_waitreply
 {
-	my ($self, $args) = @_;
+  my ($self, $args) = @_;
 
-	unless($self->{_dkimlib_handle}) {
-		throw Error::Simple('dkim_dns_set_query_waitreply called before dkim_sign/dkim_verify');
-	}
-	foreach(qw(func)) {
-		exists($$args{$_}) or throw Error::Simple("dkim_dns_set_query_waitreply missing argument '$_'");
-		defined($$args{$_}) or throw Error::Simple("dkim_dns_set_query_waitreply undefined argument '$_'");
-	}
+  unless($self->{_dkimlib_handle}) {
+    throw Error::Simple('dkim_dns_set_query_waitreply called before dkim_sign/dkim_verify');
+  }
+  foreach(qw(func)) {
+    exists($$args{$_}) or throw Error::Simple("dkim_dns_set_query_waitreply missing argument '$_'");
+    defined($$args{$_}) or throw Error::Simple("dkim_dns_set_query_waitreply undefined argument '$_'");
+  }
 
-	return _dkim_dns_set_query_waitreply($self->{_dkimlib_handle}, $$args{func});
+  return _dkim_dns_set_query_waitreply($self->{_dkimlib_handle}, $$args{func});
 }
 
 =head2 dkim_options
@@ -567,26 +570,26 @@ For further information, refer to http://www.opendkim.org/libopendkim/
 
 sub dkim_options
 {
-	my ($self, $args) = @_;
+  my ($self, $args) = @_;
 
-	unless($self->{_dkimlib_handle}) {
-		throw Error::Simple('dkim_options called before dkim_sign/dkim_verify');
-	}
-	foreach(qw(op opt data len)) {
-		exists($$args{$_}) or throw Error::Simple("dkim_options missing argument '$_'");
-		defined($$args{$_}) or throw Error::Simple("dkim_options undefined argument '$_'");
-	}
+  unless($self->{_dkimlib_handle}) {
+    throw Error::Simple('dkim_options called before dkim_sign/dkim_verify');
+  }
+  foreach(qw(op opt data len)) {
+    exists($$args{$_}) or throw Error::Simple("dkim_options missing argument '$_'");
+    defined($$args{$_}) or throw Error::Simple("dkim_options undefined argument '$_'");
+  }
 
-	return _dkim_options($self->{_dkimlib_handle}, $$args{op}, $$args{opt}, $$args{data}, $$args{len});
+  return _dkim_options($self->{_dkimlib_handle}, $$args{op}, $$args{opt}, $$args{data}, $$args{len});
 }
 
 sub DESTROY
 {
-	my $self = shift;
+  my $self = shift;
 
-	if($self->{_dkimlib_handle}) {
-		$self->dkim_close();
-	}
+  if($self->{_dkimlib_handle}) {
+    $self->dkim_close();
+  }
 }
 
 =head2 dkim_libversion
@@ -599,7 +602,7 @@ Static method.
 
 =head2 EXPORT
 
-This module exports nothing.
+Many DKIM_* constants, e.g. DKIM_STAT_OK are exported.
 
 =head1 SEE ALSO
 
