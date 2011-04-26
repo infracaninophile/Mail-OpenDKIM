@@ -3,7 +3,7 @@ name:               Mail-OpenDKIM
 version:            0.01
 abstract:           Perl interface to the OpenDKIM library
 author:
-    - Nigel Horne <nigel@kcilink.com>
+    - Nigel Horne <nigel@mailermailer.com>
 license:            unknown
 distribution_type:  module
 configure_requires:

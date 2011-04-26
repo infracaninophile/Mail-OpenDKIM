@@ -30,6 +30,7 @@ use constant DKIM_SIGN_RSASHA256 => 1;
 use constant DKIM_STAT_OK => 0;  # dkim.h
 use constant DKIM_STAT_BADSIG => 1;
 use constant DKIM_STAT_NOSIG => 2;
+use constant DKIM_STAT_NOKEY => 3;
 use constant DKIM_STAT_CANTVRFY => 4;
 use constant DKIM_STAT_SYNTAX => 5;
 use constant DKIM_STAT_NORESOURCE => 6;
@@ -51,7 +52,9 @@ use constant DKIM_PRESULT_FOUND => 1;
 
 use constant DKIM_DNSSEC_UNKNOWN => -1;
 
+use constant DKIM_SIGBH_UNTESTED => -1;
 use constant DKIM_SIGBH_MATCH => 0;
+use constant DKIM_SIGBH_MISMATCH => 1;
 
 use constant DKIM_SIGERROR_VERSION => 1;
 
@@ -84,6 +87,7 @@ our @EXPORT = qw(
   DKIM_STAT_OK
   DKIM_STAT_BADSIG
   DKIM_STAT_NOSIG
+  DKIM_STAT_NOKEY
   DKIM_STAT_CANTVRFY
   DKIM_STAT_SYNTAX
   DKIM_STAT_NORESOURCE
@@ -101,7 +105,9 @@ our @EXPORT = qw(
 
   DKIM_DNSSEC_UNKNOWN
 
+  DKIM_SIGBH_UNTESTED
   DKIM_SIGBH_MATCH
+  DKIM_SIGBH_MISMATCH
 
   DKIM_SIGERROR_VERSION
 

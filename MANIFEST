@@ -10,6 +10,7 @@ lib/Mail/OpenDKIM/PrivateKey.pm
 lib/Mail/OpenDKIM/Signature.pm
 lib/Mail/OpenDKIM/Signer.pm
 typemap
+t/example.key
 t/00-load.t
 t/Mail-OpenDKIM-PrivateKey.t
 t/Mail-OpenDKIM-Signature.t
