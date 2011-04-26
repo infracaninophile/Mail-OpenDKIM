@@ -1,3 +1,9 @@
+/*
+ * This module is Copyright 2011 Khera Communications, Inc.
+ * It is licensed under the same terms as Perl itself.
+ *
+ * nigel@mailermailer.com
+ */
 #include "EXTERN.h"
 #include "perl.h"
 #include "XSUB.h"

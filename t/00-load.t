@@ -10,7 +10,7 @@ BEGIN {
 }
 
 my $version = Mail::OpenDKIM::dkim_libversion();
-ok($version > 0);
 $version = sprintf("%x", $version);
+ok($version >= 2030000);	# Needs at least version 2.3
 
 diag ("Testing Mail::OpenDKIM $Mail::OpenDKIM::VERSION, Perl $], OpenDKIM $version, $^X");

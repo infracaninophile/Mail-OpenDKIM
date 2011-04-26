@@ -232,7 +232,7 @@ This module does not yet implement all of the API of Mail::DKIM::Signer
 
 =head1 AUTHOR
 
-Nigel Horne, C<< <njh at mailermailer.com> >>
+Nigel Horne, C<< <nigel at mailermailer.com> >>
 
 =head1 BUGS
 

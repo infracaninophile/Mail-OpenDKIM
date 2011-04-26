@@ -1454,7 +1454,7 @@ Feedback will be greatfully received.
 
 =head1 AUTHOR
 
-Nigel Horne, C<< <njh at mailermailer.com> >>
+Nigel Horne, C<< <nigel at mailermailer.com> >>
 
 =head1 SUPPORT
 
