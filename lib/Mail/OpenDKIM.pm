@@ -134,7 +134,56 @@ $VERSION = eval $VERSION;
 require XSLoader;
 XSLoader::load('Mail::OpenDKIM', $VERSION);
 
-# Preloaded methods go here.
+=head1 NAME
+
+Mail::OpenDKIM - Provides an interface to libOpenDKIM
+
+=head1 SYNOPSIS
+
+  use Mail::DKIM::Signer;
+
+  # create a signer object
+  my $dkim = Mail::OpenDKIM::Signer->new(
+  	Algorithm => 'rsa-sha1',
+	Method => 'relaxed',
+	Domain => 'example.org',
+	Selector => 'selector1',
+	KeyFile => 'private.key',
+  );
+
+  # read an email and pass it into the signer, one line at a time
+  while(<STDIN>) {
+  	# remove local line terminators
+	chomp;
+	s/\015$//;
+
+	# use SMTP line terminators
+	$dkim->PRINT("$_\015\012");
+  }
+  $dkim->CLOSE();
+
+  # what is the signature result?
+  my $signature = $dkim->signature;
+  print $signature->as_string;
+
+=head1 DESCRIPTION
+
+Mail::OpenDKIM, coupled with Mail::OpenDKIM::DKIM, provides a means of calling libOpenDKIM
+from Perl.
+Mail::OpenDKIM implements those routine taking a DKIM_LIB argument; those taking a DKIM
+argument have been implemented in Mail::OpenDKIM::DKIM.
+
+Mail::OpenDKIM::Signer provides a drop in replacement for the signature process provided by
+Mail::DKIM::Signer.
+
+=head1 SUBROUTINES/METHODS
+
+=head2 new
+
+Create a new signing/verifying object.
+
+=cut
+
 sub new {
 	my $class = shift;
 
@@ -146,6 +195,12 @@ sub new {
 
 	return $self;
 }
+
+=head2 dkim_init
+
+For further information, refer to http://www.opendkim.org/libopendkim/
+
+=cut
 
 sub dkim_init
 {
@@ -162,6 +217,12 @@ sub dkim_init
 	return $self;
 }
 
+=head2 dkim_close
+
+For further information, refer to http://www.opendkim.org/libopendkim/
+
+=cut
+
 sub dkim_close
 {
 	my $self = shift;
@@ -173,6 +234,12 @@ sub dkim_close
 	$self->{_dkimlib_handle} = undef;
 }
 
+=head2 dkim_flush_cache
+
+For further information, refer to http://www.opendkim.org/libopendkim/
+
+=cut
+
 sub dkim_flush_cache
 {
 	my $self = shift;
@@ -182,6 +249,12 @@ sub dkim_flush_cache
 	}
 	return _dkim_flush_cache($self->{_dkimlib_handle});
 }
+
+=head2 dkim_libfeature
+
+For further information, refer to http://www.opendkim.org/libopendkim/
+
+=cut
 
 sub dkim_libfeature
 {
@@ -197,6 +270,14 @@ sub dkim_libfeature
 
 	return _dkim_libfeature($self->{_dkimlib_handle}, $$args{feature});
 }
+
+=head2 dkim_sign
+
+For further information, refer to http://www.opendkim.org/libopendkim/
+
+Returns a Mail::OpenDKIM::DKIM object.
+
+=cut
 
 sub dkim_sign
 {
@@ -222,6 +303,15 @@ sub dkim_sign
 	return $dkim;
 }
 
+=head2 dkim_verify
+
+For further information, refer to http://www.opendkim.org/libopendkim/
+
+Returns a Mail::OpenDKIM::DKIM object.
+The memclosure argument is ignored.
+
+=cut
+
 sub dkim_verify
 {
 	my ($self, $args) = @_;
@@ -246,12 +336,24 @@ sub dkim_verify
 	return $dkim;
 }
 
+=head2 dkim_getcachestats
+
+For further information, refer to http://www.opendkim.org/libopendkim/
+
+=cut
+
 sub dkim_getcachestats
 {
 	my ($self, $args) = @_;
 
 	return _dkim_getcachestats($$args{queries}, $$args{hits}, $$args{expired});
 }
+
+=head2 dkim_set_dns_callback
+
+For further information, refer to http://www.opendkim.org/libopendkim/
+
+=cut
 
 sub dkim_set_dns_callback
 {
@@ -268,6 +370,12 @@ sub dkim_set_dns_callback
 	return _dkim_set_dns_callback($self->{_dkimlib_handle}, $$args{func}, $$args{interval});
 }
 
+=head2 dkim_set_key_lookup
+
+For further information, refer to http://www.opendkim.org/libopendkim/
+
+=cut
+
 sub dkim_set_key_lookup
 {
 	my ($self, $args) = @_;
@@ -282,6 +390,12 @@ sub dkim_set_key_lookup
 
 	return _dkim_set_key_lookup($self->{_dkimlib_handle}, $$args{func});
 }
+
+=head2 dkim_set_policy_lookup
+
+For further information, refer to http://www.opendkim.org/libopendkim/
+
+=cut
 
 sub dkim_set_policy_lookup
 {
@@ -298,6 +412,12 @@ sub dkim_set_policy_lookup
 	return _dkim_set_policy_lookup($self->{_dkimlib_handle}, $$args{func});
 }
 
+=head2 dkim_set_signature_handle
+
+For further information, refer to http://www.opendkim.org/libopendkim/
+
+=cut
+
 sub dkim_set_signature_handle
 {
 	my ($self, $args) = @_;
@@ -312,6 +432,12 @@ sub dkim_set_signature_handle
 
 	return _dkim_set_signature_handle($self->{_dkimlib_handle}, $$args{func});
 }
+
+=head2 dkim_set_signature_handle_free
+
+For further information, refer to http://www.opendkim.org/libopendkim/
+
+=cut
 
 sub dkim_set_signature_handle_free
 {
@@ -328,6 +454,12 @@ sub dkim_set_signature_handle_free
 	return _dkim_set_signature_handle_free($self->{_dkimlib_handle}, $$args{func});
 }
 
+=head2 dkim_set_signature_tagvalues
+
+For further information, refer to http://www.opendkim.org/libopendkim/
+
+=cut
+
 sub dkim_set_signature_tagvalues
 {
 	my ($self, $args) = @_;
@@ -342,6 +474,12 @@ sub dkim_set_signature_tagvalues
 
 	return _dkim_set_signature_tagvalues($self->{_dkimlib_handle}, $$args{func});
 }
+
+=head2 dkim_dns_set_query_cancel
+
+For further information, refer to http://www.opendkim.org/libopendkim/
+
+=cut
 
 sub dkim_dns_set_query_cancel
 {
@@ -358,6 +496,12 @@ sub dkim_dns_set_query_cancel
 	return _dkim_dns_set_query_cancel($self->{_dkimlib_handle}, $$args{func});
 }
 
+=head2 dkim_dns_set_query_service
+
+For further information, refer to http://www.opendkim.org/libopendkim/
+
+=cut
+
 sub dkim_dns_set_query_service
 {
 	my ($self, $args) = @_;
@@ -372,6 +516,12 @@ sub dkim_dns_set_query_service
 
 	return _dkim_dns_set_query_service($self->{_dkimlib_handle}, $$args{func});
 }
+
+=head2 dkim_dns_set_query_start
+
+For further information, refer to http://www.opendkim.org/libopendkim/
+
+=cut
 
 sub dkim_dns_set_query_start
 {
@@ -388,6 +538,12 @@ sub dkim_dns_set_query_start
 	return _dkim_dns_set_query_start($self->{_dkimlib_handle}, $$args{func});
 }
 
+=head2 dkim_dns_set_query_waitreply
+
+For further information, refer to http://www.opendkim.org/libopendkim/
+
+=cut
+
 sub dkim_dns_set_query_waitreply
 {
 	my ($self, $args) = @_;
@@ -402,6 +558,12 @@ sub dkim_dns_set_query_waitreply
 
 	return _dkim_dns_set_query_waitreply($self->{_dkimlib_handle}, $$args{func});
 }
+
+=head2 dkim_options
+
+For further information, refer to http://www.opendkim.org/libopendkim/
+
+=cut
 
 sub dkim_options
 {
@@ -427,50 +589,6 @@ sub DESTROY
 	}
 }
 
-1;
-
-__END__
-# Below is stub documentation for your module. You'd better edit it!
-
-=head1 NAME
-
-Mail::OpenDKIM - Re-implementation of Mail::DKIM to use the OpenDKIM library
-
-=head1 SYNOPSIS
-
-  use Mail::OpenDKIM;
-  blah blah blah
-
-=head1 DESCRIPTION
-
-The signature creation rountines have been tested more thoroughly than the signature
-verification routines.
-
-Feedback will be greatfully received.
-
-=head1 SUBROUTINES/Methods
-
-=head2 new
-
-=head2 dkim_init
-
-=head2 dkim_close
-
-=head2 dkim_flush_cache
-
-=head2 dkim_libfeature
-
-=head2 dkim_sign
-
-Returns a Mail::OpenDKIM::DKIM object.
-
-=head2 dkim_verify
-
-Returns a Mail::OpenDKIM::DKIM object.
-The memclosure argument is ignored.
-
-=head2 dkim_ssl_version
-
 =head2 dkim_libversion
 
 Static method.
@@ -479,48 +597,76 @@ Static method.
 
 Static method.
 
-=head2 dkim_set_dns_callback
-
-=head2 dkim_set_dns_callback
-
-=head2 dkim_set_key_lookup
-
-=head2 dkim_set_policy_lookup
-
-=head2 dkim_set_signature_handle
-
-=head2 dkim_set_signature_handle_free
-
-=head2 dkim_set_signature_tagvalues
-
-=head2 dkim_options
-
 =head2 EXPORT
 
-All the function names and constants
-
+This module exports nothing.
 
 =head1 SEE ALSO
 
+Mail::DKIM
+
 http://www.opendkim.org/libopendkim/
+
+RFC 4870, RFC 4871
 
 =head1 NOTES
 
-Tested against libOpenDKIM2.2.
+Tested against libOpenDKIM 2.3.1. Known to fail to compile against 2.2.
 
-Only Mail::DKIM::Signer, and the support for it, has been implemented.
+Only portions of Mail::DKIM::Signer, and the support for it, has been implemented.
+
+Please report any bugs or feature requests to C<bug-mail-opendkim at rt.cpan.org>, or through
+the web interface at L<http://rt.cpan.org/NoAuth/ReportBug.html?Queue=Mail-OpenDKIM>.
+I will be notified, and then you'll automatically be notified of progress on your bug as I make changes.
+
+The signature creation rountines have been tested more thoroughly than the signature
+verification routines.
+
+Feedback will be greatfully received.
 
 =head1 AUTHOR
 
-Nigel Horne, E<lt>nigel@kcilink.comE<gt>
+Nigel Horne, C<< <njh at mailermailer.com> >>
 
-=head1 COPYRIGHT AND LICENSE
+=head1 SUPPORT
 
-Copyright (C) 2011 by MailerMailer
+You can find documentation for this module with the perldoc command.
 
-This library is free software; you can redistribute it and/or modify
-it under the same terms as Perl itself, either Perl version 5.10.0 or,
-at your option, any later version of Perl 5 you may have available.
+    perldoc Mail::OpenDKIM
 
+You can also look for information at:
+
+=over 4
+
+=item * RT: CPAN's request tracker
+
+L<http://rt.cpan.org/NoAuth/Bugs.html?Dist=Mail-OpenDKIM>
+
+=item * AnnoCPAN: Annotated CPAN documentation
+
+L<http://annocpan.org/dist/Mail-OpenDKIM>
+
+=item * CPAN Ratings
+
+L<http://cpanratings.perl.org/d/Mail-OpenDKIM>
+
+=item * Search CPAN
+
+L<http://search.cpan.org/dist/Mail-OpenDKIM/>
+
+=back
+
+
+=head1 SPONSOR
+
+This code has been developed under sponsorship of MailerMailer LLC,
+http://www.mailermailer.com/
+
+=head1 COPYRIGHT AND LICENCE
+
+This module is Copyright 2011 Khera Communications, Inc.
+It is licensed under the same terms as Perl itself.
 
 =cut
+
+1;

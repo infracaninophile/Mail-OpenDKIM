@@ -47,7 +47,8 @@ Mail::OpenDKIM::Signer - generates a DKIM signature for a message
 Use this class to generate a signature for inclusion in the header of an email.
 
 It provides enough of a subset of the functionaility of Mail::DKIM::Signer to allow
-use of the OpenDKIM library with simple drop inreplacesments.
+use of the OpenDKIM library with simple drop-in replacements. Mail::OpenDKIM::Signer
+offloads the signing work to the OpenDKIM library, and is therefore far quicker.
 
 =head1 SUBROUTINES/METHODS
 

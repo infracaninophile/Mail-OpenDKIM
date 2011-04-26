@@ -26,7 +26,7 @@ Mail::OpenDKIM::PrivateKey - Load in a private key for use with the Mail::OpenDK
 =head1 DESCRIPTION
 
 Mail::OpenDKIM::PrivateKey provides a system to allow private keys to be loaded from a file
-for use when siginging an email with Mail::OpenDKIM::Signer.
+for use when signing an email with Mail::OpenDKIM::Signer.
 
 It provides enough of a subset of the functionaility of Mail::DKIM::PrivateKey to allow
 use of the OpenDKIM library with Mail::OpenDKIM::Signer.
