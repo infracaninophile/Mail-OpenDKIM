@@ -6,7 +6,7 @@ BEGIN { use_ok('Mail::OpenDKIM') };
 
 #########################
 
-GETDOMAIN: {
+MINBODY: {
 
 	my $o = new_ok('Mail::OpenDKIM');
 	ok($o->dkim_init());
@@ -23,7 +23,7 @@ GETDOMAIN: {
 
 		ok(defined($d1));
 
-		ok($d1->dkim_getid() == 1);
+		ok(defined($d1->dkim_getid()));
 
 		ok(defined($d2));
 
@@ -32,7 +32,7 @@ GETDOMAIN: {
 		fail($ex->stringify);
 	};
 
-	my $header = 'From: Nigel Horne <njh@example.com>'; 
+	my $header = 'From: Nigel Horne <njh@example.com>';
 	ok($d1->dkim_header({ header => $header, len => length($header) }) == DKIM_STAT_OK);
 	ok($d2->dkim_header({ header => $header, len => length($header) }) == DKIM_STAT_OK);
 
