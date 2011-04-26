@@ -9,7 +9,7 @@ BEGIN { use_ok('Mail::OpenDKIM::PrivateKey') };
 #########################
 
 eval {
-	ok(!defined(Mail::OpenDKIM::PrivateKey->load(File => 'ffff')));
+  ok(!defined(Mail::OpenDKIM::PrivateKey->load(File => 'ffff')));
 };
 
 my $pk = Mail::OpenDKIM::PrivateKey->load(File => 't/example.key');
