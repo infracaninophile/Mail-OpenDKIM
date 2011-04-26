@@ -3,8 +3,7 @@
 
 #########################
 
-use Test::More tests => 8;
-BEGIN { use_ok('Mail::OpenDKIM::PrivateKey') };
+use Test::More tests => 7;
 BEGIN { use_ok('Mail::OpenDKIM::Signer') };
 
 #########################

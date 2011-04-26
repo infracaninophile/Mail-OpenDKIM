@@ -7,6 +7,7 @@ use warnings;
 use Error qw(:try);
 use Carp;
 use Mail::OpenDKIM;
+use Mail::OpenDKIM::PrivateKey;	# Including this allows callers to only include Signer.pm
 
 require Exporter;
 
