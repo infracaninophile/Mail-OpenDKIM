@@ -7,223 +7,277 @@ use warnings;
 use Error qw(:try);
 use Carp;
 use Mail::OpenDKIM;
-use Mail::OpenDKIM::PrivateKey;	# Including this allows callers to only include Signer.pm
+use Mail::OpenDKIM::PrivateKey;  # Including this allows callers to only include Signer.pm
+use Mail::OpenDKIM::Signature;
 
-require Exporter;
+=head1 NAME
 
-our @ISA = qw(Exporter);
+Mail::OpenDKIM::Signer - generates a DKIM signature for a message
 
-# Items to export into callers namespace by default. Note: do not export
-# names by default without a very good reason. Use EXPORT_OK instead.
-# Do not simply export all your public functions/methods/constants.
+=head1 SYNOPSIS
 
-# This allows declaration	use Mail::OpenDKIM::Signer ':all';
-# If you do not need this, moving things directly into @EXPORT or @EXPORT_OK
-# will save memory.
-our %EXPORT_TAGS = ( 'all' => [ qw(
-	
-) ] );
+  use Mail::DKIM::Signer;
 
-our @EXPORT_OK = ( @{ $EXPORT_TAGS{'all'} } );
+  # create a signer object
+  my $dkim = Mail::OpenDKIM::Signer->new(
+  	Algorithm => 'rsa-sha1',
+	Method => 'relaxed',
+	Domain => 'example.org',
+	Selector => 'selector1',
+	KeyFile => 'private.key',
+  );
 
-our @EXPORT = qw(
-	
-);
+  # read an email and pass it into the signer, one line at a time
+  while(<STDIN>) {
+  	# remove local line terminators
+	chomp;
+	s/\015$//;
 
-our $VERSION = '0.01';
+	# use SMTP line terminators
+	$dkim->PRINT("$_\015\012");
+  }
+  $dkim->CLOSE();
 
-# Preloaded methods go here.
+  # what is the signature result?
+  my $signature = $dkim->signature;
+  print $signature->as_string;
+
+=head1 DESCRIPTION
+
+Use this class to generate a signature for inclusion in the header of an email.
+
+It provides enough of a subset of the functionaility of Mail::DKIM::Signer to allow
+use of the OpenDKIM library with simple drop inreplacesments.
+
+=head1 SUBROUTINES/METHODS
+
+=head2 new
+
+Creates the signer.
+
+=cut
+
 sub new {
-	my ($class, %args) = @_;
+  my ($class, %args) = @_;
 
-	my $self = {
-	};
+  my $self = {
+  };
 
-	my $algorithm;
+  my $algorithm;
 
-	if(!$args{Algorithm}) {
-		croak('Missing algorithm');
-	}
-	elsif($args{Algorithm} eq 'rsa-sha1') {
-		$algorithm = DKIM_SIGN_RSASHA1;
-	}
-	elsif($args{Algorithm} eq 'rsa-sha256') {
-		$algorithm = DKIM_SIGN_RSASHA256;
-	}
-	else {
-		croak("Unsupported algorithm: $args{Algorithm}");
-	}
+  if(!$args{Algorithm}) {
+    croak('Missing algorithm');
+  }
+  elsif($args{Algorithm} eq 'rsa-sha1') {
+    $algorithm = DKIM_SIGN_RSASHA1;
+  }
+  elsif($args{Algorithm} eq 'rsa-sha256') {
+    $algorithm = DKIM_SIGN_RSASHA256;
+  }
+  else {
+    croak("Unsupported algorithm: $args{Algorithm}");
+  }
 
-	my ($h, $b);
+  my ($h, $b);
 
-	if(!$args{Method}) {
-		croak('Missing method');
-	}
-	elsif($args{Method} =~ /(.+)\/(.+)/) {
-		$h = $1;
-		$b = $2;
-	}
-	else {
-		$h = $args{Method};
-		$b = $h;
-	}
+  if(!$args{Method}) {
+    croak('Missing method');
+  }
+  elsif($args{Method} =~ /(.+)\/(.+)/) {
+    $h = $1;
+    $b = $2;
+  }
+  else {
+    $h = $args{Method};
+    $b = $h;
+  }
 
-	my ($hdrcanon_alg, $bodycanon_alg);
+  my ($hdrcanon_alg, $bodycanon_alg);
 
-	if($h eq 'relaxed') {
-		$hdrcanon_alg = DKIM_CANON_RELAXED;
-	}
-	elsif($h eq 'simple') {
-		$hdrcanon_alg = DKIM_CANON_SIMPLE;
-	}
-	else {
-		croak("Unsupported method: $h");
-	}
+  if($h eq 'relaxed') {
+    $hdrcanon_alg = DKIM_CANON_RELAXED;
+  }
+  elsif($h eq 'simple') {
+    $hdrcanon_alg = DKIM_CANON_SIMPLE;
+  }
+  else {
+    croak("Unsupported method: $h");
+  }
 
-	if($b eq 'relaxed') {
-		$bodycanon_alg = DKIM_CANON_RELAXED;
-	}
-	elsif($b eq 'simple') {
-		$bodycanon_alg = DKIM_CANON_SIMPLE;
-	}
-	else {
-		croak("Unsupported method: $b");
-	}
+  if($b eq 'relaxed') {
+    $bodycanon_alg = DKIM_CANON_RELAXED;
+  }
+  elsif($b eq 'simple') {
+    $bodycanon_alg = DKIM_CANON_SIMPLE;
+  }
+  else {
+    croak("Unsupported method: $b");
+  }
 
-	my $oh = Mail::OpenDKIM->new();
+  my $oh = Mail::OpenDKIM->new();
 
-	$oh->dkim_init();
+  $oh->dkim_init();
 
-	my $signer;
+  my $signer;
 
-	try {
-		$signer = $oh->dkim_sign({
-			id => 'MLM',
-			secretkey => $args{Key}->data,
-			selector => $args{Selector},
-			domain => $args{Domain},
-			hdrcanon_alg => $hdrcanon_alg,
-			bodycanon_alg => $bodycanon_alg,
-			sign_alg => $algorithm,
-			length => -1
-		});
-	} catch Error with {
-		my $ex = shift;
-		croak($ex->stringify);
-	};
+  try {
+    $signer = $oh->dkim_sign({
+      id => 'MLM',
+      secretkey => $args{Key}->data(),
+      selector => $args{Selector},
+      domain => $args{Domain},
+      hdrcanon_alg => $hdrcanon_alg,
+      bodycanon_alg => $bodycanon_alg,
+      sign_alg => $algorithm,
+      length => -1
+    });
+  } catch Error with {
+    my $ex = shift;
+    croak($ex->stringify);
+  };
 
-	$self->{_dkim_handle} = $oh;	# Mail::OpenDKIM object
-	$self->{_signer} = $signer;	# Mail::OpenDKIM::DKIM object
+  $self->{_dkim_handle} = $oh;  # Mail::OpenDKIM object
+  $self->{_signer} = $signer;  # Mail::OpenDKIM::DKIM object
+  $self->{_signature} = Mail::OpenDKIM::Signature->new(%args);
 
-	bless $self, $class;
+  bless $self, $class;
 
-	return $self;
+  return $self;
 }
+
+=head2 PRINT
+
+Feed part of the message to the signer.
+
+=cut
 
 sub PRINT
 {
-	my $self = shift;
+  my $self = shift;
 
-	return unless(@_);
+  return unless(@_);
 
-	my $signer = $self->{_signer};
+  my $signer = $self->{_signer};
 
-	foreach(@_) {
-		$signer->dkim_chunk({ chunkp => $_, len => length($_) });
-	}
+  foreach(@_) {
+    $signer->dkim_chunk({ chunkp => $_, len => length($_) });
+  }
 }
+
+=head2 CLOSE
+
+Call this when when you have finished feeding in the message to the signer.
+
+=cut
 
 sub CLOSE
 {
-	my $self = shift;
+  my $self = shift;
 
-	my $signer = $self->{_signer};
+  my $signer = $self->{_signer};
 
-	$signer->dkim_chunk({ chunkp => '', len => 0 });
+  $signer->dkim_chunk({ chunkp => '', len => 0 });
 
-	if($signer->dkim_eom() != DKIM_STAT_OK) {
-		croak($signer->dkim_geterror());
-	}
+  if($signer->dkim_eom() != DKIM_STAT_OK) {
+    croak($signer->dkim_geterror());
+  }
+  my $args = {
+    initial => 0,
+    buf => undef,
+    len => undef
+  };
+
+  $self->{_signer}->dkim_getsighdr_d($args);
+
+  $self->{_signature}->data($$args{buf});
 }
 
-sub as_string
+=head2 signature
+
+Access the generated Mail::OpenDKIM::Signature object.
+
+=cut
+
+sub signature
 {
-	my $self = shift;
+  my $self = shift;
 
-	my $signer = $self->{_signer};
-
-	my $args = {
-		initial => 0,
-		buf => undef,
-		len => undef
-	};
-
-	$signer->dkim_getsighdr_d($args);
-
-	return $$args{buf};
+  return $self->{_signature};
 }
 
 sub DESTROY
 {
-	my $self = shift;
+  my $self = shift;
 
-	if($self->{_signer}) {
-		$self->{_signer}->dkim_free();
-	}
-	if($self->{_dkimlib_handle}) {
-		$self->{_dkimlib_handle}->dkim_close();
-	}
+  if($self->{_signer}) {
+    $self->{_signer}->dkim_free();
+  }
+  if($self->{_dkimlib_handle}) {
+    $self->{_dkimlib_handle}->dkim_close();
+  }
 }
-
-1;
-__END__
-# Below is stub documentation for your module. You'd better edit it!
-
-=head1 NAME
-
-Mail::OpenDKIM::Signer - Perl extension for blah blah blah
-
-=head1 SYNOPSIS
-
-  use Mail::OpenDKIM::Signer;
-  blah blah blah
-
-=head1 DESCRIPTION
-
-Stub documentation for Mail::OpenDKIM::Signer, created by h2xs. It looks like the
-author of the extension was negligent enough to leave the stub
-unedited.
-
-Blah blah blah.
 
 =head2 EXPORT
 
-None by default.
-
-
+This module exports nothing.
 
 =head1 SEE ALSO
 
-Mention other useful documentation such as the documentation of
-related modules or operating system documentation (such as man pages
-in UNIX), or any relevant external documentation such as RFCs or
-standards.
+Mail::DKIM::Signer
 
-If you have a mailing list set up for your module, mention it here.
+=head1 NOTES
 
-If you have a web site set up for your module, mention it here.
+This module does not yet implement all of the API of Mail::DKIM::Signer
 
 =head1 AUTHOR
 
-Nigel Horne, E<lt>nigel@kcilink.comE<gt>
+Nigel Horne, C<< <njh at mailermailer.com> >>
 
-=head1 COPYRIGHT AND LICENSE
+=head1 BUGS
 
-Copyright (C) 2011 by Nigel Horne
+Please report any bugs or feature requests to C<bug-mail-opendkim at rt.cpan.org>, or through
+the web interface at L<http://rt.cpan.org/NoAuth/ReportBug.html?Queue=Mail-OpenDKIM>.
+I will be notified, and then you'll automatically be notified of progress on your bug as I make changes.
 
-This library is free software; you can redistribute it and/or modify
-it under the same terms as Perl itself, either Perl version 5.10.0 or,
-at your option, any later version of Perl 5 you may have available.
+=head1 SUPPORT
 
+You can find documentation for this module with the perldoc command.
+
+    perldoc Mail::OpenDKIM::Signer
+
+
+You can also look for information at:
+
+=over 4
+
+=item * RT: CPAN's request tracker
+
+L<http://rt.cpan.org/NoAuth/Bugs.html?Dist=Mail-OpenDKIM>
+
+=item * AnnoCPAN: Annotated CPAN documentation
+
+L<http://annocpan.org/dist/Mail-OpenDKIM>
+
+=item * CPAN Ratings
+
+L<http://cpanratings.perl.org/d/Mail-OpenDKIM>
+
+=item * Search CPAN
+
+L<http://search.cpan.org/dist/Mail-OpenDKIM/>
+
+=back
+
+=head1 SPONSOR
+
+This code has been developed under sponsorship of MailerMailer LLC,
+http://www.mailermailer.com/
+
+=head1 COPYRIGHT AND LICENCE
+
+This module is Copyright 2011 Khera Communications, Inc.  It is
+licensed under the same terms as Perl itself.
 
 =cut
+
+1;

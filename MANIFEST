@@ -7,10 +7,12 @@ README
 lib/Mail/OpenDKIM.pm
 lib/Mail/OpenDKIM/DKIM.pm
 lib/Mail/OpenDKIM/PrivateKey.pm
+lib/Mail/OpenDKIM/Signature.pm
 lib/Mail/OpenDKIM/Signer.pm
 typemap
 t/00-load.t
 t/Mail-OpenDKIM-PrivateKey.t
+t/Mail-OpenDKIM-Signature.t
 t/Mail-OpenDKIM-Signer.t
 t/boilerplate.t
 t/dkim_atps_check.t

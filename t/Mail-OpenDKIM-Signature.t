@@ -1,10 +1,18 @@
 #!/usr/bin/perl -wT
 
-use Test::More tests => 7;
-use Error qw(:try);
-BEGIN { use_ok('Mail::OpenDKIM') };
+use strict;
+use warnings;
+
+# Before `make install' is performed this script should be runnable with
+# `make test'. After `make install' it should work as `perl Mail-OpenDKIM-Signature.t'
 
 #########################
+
+use Test::More tests => 5;
+BEGIN { use_ok('Mail::OpenDKIM::Signature') };
+
+#########################
+
 my $key = <<'EOF';
 -----BEGIN RSA PRIVATE KEY-----
 MIIEowIBAAKCAQEAu7azXvQR9nTJRRU5SCO0l3gg2CSU6NCjcx8OreFw/U1YDn3j
@@ -35,46 +43,19 @@ K41ZoAC0yg71WKrmQ8MQcD5vRwltnNxExHAIXTV7py+qCgOvRsIBX92zum0pvSJ/
 -----END RSA PRIVATE KEY-----
 EOF
 
-KEY_SYNTAX: {
+my $signature = new_ok('Mail::OpenDKIM::Signature' => [
+		Algorithm => 'rsa-sha1',
+		Method => 'relaxed',
+		Domain => 'example.com',
+		Selector => 'example',
+		Data => $key,
+	]
+);
 
-	my $o = new_ok('Mail::OpenDKIM');
-	ok($o->dkim_init());
+my $s = 'v=1; a=rsa-sha1; c=relaxed; d=nh-dev.int.kcilink.com; h=from:to:subject; s=nh-dev; bh=TozDQdcuD/NljOIYtF7AyqaxB8s=; b=dMk1p8wJdpHEFOk2pbtSScD3c2spKGkEo917Plae1weNhdrPvZOWvpZYnQL4/S9iQQtXpUByhjU0ObbWE/SgOhpFS216C847c+3RJCESNMJqxSzf65cuGPLffKQg4dboVKS759wC3hDhIMIPmdLABaK4crFAZcBnl+AQP1QpV4H9jUydiU1CqLURpZgeRd3uqhtua/wJTz3t7ad7YfPhQst7pYD7m97xp0PZURjPTYEKTHSJfhfT4zVDXl1+/HeNc3SV+nT9trpIj9ZOfmhotPYGE1PLX5ZyhZmskff7jQDALJxj6z2jICTCKhwLOtuENf9tCYiyYlMcYuij+hTSBg==';
 
-	my $d;
+ok($signature->data($s) eq $s);
 
-	try {
-		$d = $o->dkim_sign({
-			id => 'MLM',
-			secretkey => '11111',
-			selector => 'example',
-			domain => 'example.com',
-			hdrcanon_alg => DKIM_CANON_RELAXED,
-			bodycanon_alg => DKIM_CANON_RELAXED,
-			sign_alg => DKIM_SIGN_RSASHA1,
-			length => -1,
-		});
+ok($signature->data() eq $s);
 
-		ok(defined($d));
-
-		# d is a Mail::OpenDKIM::DKIM object
-	} catch Error with {
-		my $ex = shift;
-		fail($ex->stringify);
-	};
-
-	isa_ok($d, 'Mail::OpenDKIM::DKIM');
-
-	my $signer = $d->dkim_get_signer();
-
-	ok(!defined($signer));
-
-	# I see no syntax error, so I don't know why this is failing
-	TODO: {
-		local $TODO = 'dkim_key_syntax is returning DKIM_STAT_SYNTAX on a correct key';
-		ok($d->dkim_key_syntax({ str => $key, len => length($key) }) == DKIM_STAT_OK);
-	};
-
-	$d->dkim_free();
-
-	$o->dkim_close();
-}
+ok($signature->as_string() eq "DKIM-Signature: $s");

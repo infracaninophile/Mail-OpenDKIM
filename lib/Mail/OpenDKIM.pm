@@ -127,7 +127,9 @@ our @EXPORT = qw(
 	DKIM_OPTS_TMPDIR
 );
 
+use vars qw($VERSION);
 our $VERSION = '0.01';
+$VERSION = eval $VERSION;
 
 require XSLoader;
 XSLoader::load('Mail::OpenDKIM', $VERSION);
@@ -432,7 +434,7 @@ __END__
 
 =head1 NAME
 
-Mail::OpenDKIM - Perl interface to the OpenDKIM library
+Mail::OpenDKIM - Re-implementation of Mail::DKIM to use the OpenDKIM library
 
 =head1 SYNOPSIS
 
@@ -501,6 +503,12 @@ All the function names and constants
 =head1 SEE ALSO
 
 http://www.opendkim.org/libopendkim/
+
+=head1 NOTES
+
+Tested against libOpenDKIM2.2.
+
+Only Mail::DKIM::Signer, and the support for it, has been implemented.
 
 =head1 AUTHOR
 

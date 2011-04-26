@@ -1,9 +1,14 @@
+#!/usr/bin/perl -wT
+
+use strict;
+use warnings;
+
 # Before `make install' is performed this script should be runnable with
 # `make test'. After `make install' it should work as `perl Mail-OpenDKIM-Signer.t'
 
 #########################
 
-use Test::More tests => 7;
+use Test::More tests => 10;
 BEGIN { use_ok('Mail::OpenDKIM::Signer') };
 
 #########################
@@ -37,9 +42,16 @@ $dkim->PRINT($msg);
 
 $dkim->CLOSE();
 
-my $signature = $dkim->as_string;
+my $signature = $dkim->signature;
 
 ok(defined($signature));
 
-like($signature, qr/a=rsa-sha1/);
-like($signature, qr/d=example.com/);
+isa_ok($signature, 'Mail::OpenDKIM::Signature');
+
+my $sig = $signature->as_string;
+
+ok(defined($sig));
+
+like($sig, qr/^DKIM-Signature: /);
+like($sig, qr/a=rsa-sha1/);
+like($sig, qr/d=example.com/);

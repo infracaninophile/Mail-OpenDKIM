@@ -9,17 +9,7 @@ use Carp;
 
 Mail::OpenDKIM::PrivateKey - Load in a private key for use with the Mail::OpenDKIM package
 
-=head1 VERSION
-
-Version 0.01
-
 =head1 SYNOPSIS
-
-Mail::OpenDKIM::PrivateKey provides a system to allow private keys to be loaded from a file
-for use when siginging an email with Mail::OpenDKIM::Signer.
-
-It provides enough of a subset of the functionaility of Mail::DKIM::PrivateKey to allow
-use of the OpenDKIM library with Mail::OpenDKIM::Signer.
 
   use Mail::OpenDKIM::PrivateKey;
 
@@ -32,6 +22,14 @@ use of the OpenDKIM library with Mail::OpenDKIM::Signer.
     # Do something with $pk->data();
     ...
   }
+
+=head1 DESCRIPTION
+
+Mail::OpenDKIM::PrivateKey provides a system to allow private keys to be loaded from a file
+for use when siginging an email with Mail::OpenDKIM::Signer.
+
+It provides enough of a subset of the functionaility of Mail::DKIM::PrivateKey to allow
+use of the OpenDKIM library with Mail::OpenDKIM::Signer.
 
 =head1 SUBROUTINES/METHODS
 
@@ -67,7 +65,6 @@ sub load
   return $self;
 }
 
-
 =head2 data
 
 This routine provides access to the key data.
@@ -79,7 +76,6 @@ sub data {
 
   return $self->{_data};
 }
-
 
 =head2 EXPORT
 
@@ -95,17 +91,54 @@ This module does not yet implement all of the API of Mail::DKIM::PrivateKey
 
 =head1 AUTHOR
 
-Nigel Horne, E<lt>nigel@kcilink.comE<gt>
+Nigel Horne, C<< <njh at mailermailer.com> >>
 
-=head1 COPYRIGHT AND LICENSE
+=head1 BUGS
 
-Copyright (C) 2011 by Nigel Horne
+Please report any bugs or feature requests to C<bug-mail-opendkim at rt.cpan.org>, or through
+the web interface at L<http://rt.cpan.org/NoAuth/ReportBug.html?Queue=Mail-OpenDKIM>.
+I will be notified, and then you'll automatically be notified of progress on your bug as I make changes.
 
-This library is free software; you can redistribute it and/or modify
-it under the same terms as Perl itself, either Perl version 5.10.0 or,
-at your option, any later version of Perl 5 you may have available.
+=head1 SUPPORT
+
+You can find documentation for this module with the perldoc command.
+
+    perldoc Mail::OpenDKIM::PrivateKey
+
+
+You can also look for information at:
+
+=over 4
+
+=item * RT: CPAN's request tracker
+
+L<http://rt.cpan.org/NoAuth/Bugs.html?Dist=Mail-OpenDKIM>
+
+=item * AnnoCPAN: Annotated CPAN documentation
+
+L<http://annocpan.org/dist/Mail-OpenDKIM>
+
+=item * CPAN Ratings
+
+L<http://cpanratings.perl.org/d/Mail-OpenDKIM>
+
+=item * Search CPAN
+
+L<http://search.cpan.org/dist/Mail-OpenDKIM/>
+
+=back
+
+
+=head1 SPONSOR
+
+This code has been developed under sponsorship of MailerMailer LLC,
+http://www.mailermailer.com/
+
+=head1 COPYRIGHT AND LICENCE
+
+This module is Copyright 2011 Khera Communications, Inc.  It is
+licensed under the same terms as Perl itself.
 
 =cut
 
 1;
-

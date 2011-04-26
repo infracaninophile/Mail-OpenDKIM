@@ -25,16 +25,37 @@ DEPENDENCIES
 
 This module requires these other modules and libraries:
 
-  blah blah blah
+  Test::More
+  libOpenDKIM 2.2 (http://www.opendkim.org/libopendkim/)
+  C compiler
+
+SUPPORT AND DOCUMENTATION
+
+After installing, you can find documentation for this module with the
+perldoc command.
+
+    perldoc Mail::OpenDKIM
+
+You can also look for information at:
+
+    RT, CPAN's request tracker
+        http://rt.cpan.org/NoAuth/Bugs.html?Dist=Mail::OpenDKIM
+
+    AnnoCPAN, Annotated CPAN documentation
+        http://annocpan.org/dist/Mail::OpenDKIM
+
+    CPAN Ratings
+        http://cpanratings.perl.org/d/Mail::OpenDKIM
+
+    Search CPAN
+        http://search.cpan.org/dist/Mail::OpenDKIM/
+
+SPONSOR
+
+This code has been developed under sponsorship of MailerMailer LLC,
+http://www.mailermailer.com/
 
 COPYRIGHT AND LICENCE
 
-Put the correct copyright and licence information here.
-
-Copyright (C) 2011 by Nigel Horne
-
-This library is free software; you can redistribute it and/or modify
-it under the same terms as Perl itself, either Perl version 5.10.0 or,
-at your option, any later version of Perl 5 you may have available.
-
-
+This module is Copyright 2011 Khera Communications, Inc.  It is
+licensed under the same terms as Perl itself.
