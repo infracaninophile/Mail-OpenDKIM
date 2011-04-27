@@ -139,47 +139,49 @@ $VERSION = sprintf "%d", q$Revision$ =~ /(\d+)/;
 require XSLoader;
 XSLoader::load('Mail::OpenDKIM', $VERSION);
 
+=pod
+
 =head1 NAME
 
 Mail::OpenDKIM - Provides an interface to libOpenDKIM
 
 =head1 SYNOPSIS
 
-  use Mail::DKIM::Signer;
+ use Mail::DKIM::Signer;
 
-  # create a signer object
-  my $dkim = Mail::OpenDKIM::Signer->new(
-    Algorithm => 'rsa-sha1',
+ # create a signer object
+ my $dkim = Mail::OpenDKIM::Signer->new(
+  Algorithm => 'rsa-sha1',
   Method => 'relaxed',
   Domain => 'example.org',
   Selector => 'selector1',
   KeyFile => 'private.key',
-  );
+ );
 
-  # read an email and pass it into the signer, one line at a time
-  while(<STDIN>) {
-    # remove local line terminators
+ # read an email and pass it into the signer, one line at a time
+ while(<STDIN>) {
+  # remove local line terminators
   chomp;
   s/\015$//;
 
   # use SMTP line terminators
   $dkim->PRINT("$_\015\012");
-  }
-  $dkim->CLOSE();
+ }
+ $dkim->CLOSE();
 
-  # what is the signature result?
-  my $signature = $dkim->signature;
-  print $signature->as_string;
+ # what is the signature result?
+ my $signature = $dkim->signature;
+ print $signature->as_string;
 
 =head1 DESCRIPTION
 
-Mail::OpenDKIM, coupled with Mail::OpenDKIM::DKIM, provides a means of calling libOpenDKIM
-from Perl.
-Mail::OpenDKIM implements those routine taking a DKIM_LIB argument; those taking a DKIM
-argument have been implemented in Mail::OpenDKIM::DKIM.
+Mail::OpenDKIM, coupled with Mail::OpenDKIM::DKIM, provides a means of
+calling libOpenDKIM from Perl.  Mail::OpenDKIM implements those
+routine taking a DKIM_LIB argument; those taking a DKIM argument have
+been implemented in Mail::OpenDKIM::DKIM.
 
-Mail::OpenDKIM::Signer provides a drop in replacement for the signature process provided by
-Mail::DKIM::Signer.
+Mail::OpenDKIM::Signer provides a drop in replacement for the
+signature process provided by Mail::DKIM::Signer.
 
 When an error is encountered, an Error::Simple object is thrown.
 
@@ -605,7 +607,7 @@ Static method.
 
 Static method.
 
-=head2 EXPORT
+=head1 EXPORT
 
 Many DKIM_* constants, e.g. DKIM_STAT_OK are exported.
 
@@ -617,18 +619,27 @@ http://www.opendkim.org/libopendkim/
 
 RFC 4870, RFC 4871
 
+=head1 DEPENDENCIES
+
+This module requires these other modules and libraries:
+
+  Test::More
+  libOpenDKIM 2.3 (http://www.opendkim.org/libopendkim/)
+  C compiler
+
 =head1 NOTES
 
 Tested against libOpenDKIM 2.3.1. Known to fail to compile against 2.2.
 
-Only portions of Mail::DKIM::Signer, and the support for it, has been implemented.
+Only portions of Mail::DKIM::Signer interface, and the support for it,
+have been implemented.
 
 Please report any bugs or feature requests to C<bug-mail-opendkim at rt.cpan.org>, or through
 the web interface at L<http://rt.cpan.org/NoAuth/ReportBug.html?Queue=Mail-OpenDKIM>.
 I will be notified, and then you'll automatically be notified of progress on your bug as I make changes.
 
-The signature creation rountines have been tested more thoroughly than the signature
-verification routines.
+The signature creation rountines have been tested more thoroughly than
+the signature verification routines.
 
 Feedback will be greatfully received.
 
