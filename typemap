@@ -1,3 +1,4 @@
+# $Id$
 TYPEMAP
 DKIM_LIB *	T_PTR
 DKIM *		T_PTR

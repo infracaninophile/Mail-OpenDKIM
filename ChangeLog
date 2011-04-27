@@ -1,6 +1,6 @@
 Revision history for Perl extension Mail::OpenDKIM.
 
-0.01  Thu Apr  7 12:09:43 2011
+0000  Thu Apr  7 12:09:43 2011
 	- original version; created by h2xs 1.23 with options
 		-A -n Mail::OpenDKIM
 

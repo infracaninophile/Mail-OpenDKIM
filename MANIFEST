@@ -1,8 +1,7 @@
-Changes
+ChangeLog
 Makefile.PL
 MANIFEST
 OpenDKIM.xs
-ppport.h
 README
 lib/Mail/OpenDKIM.pm
 lib/Mail/OpenDKIM/DKIM.pm
@@ -84,4 +83,3 @@ t/dkim_ssl_version.t
 t/manifest.t
 t/pod-coverage.t
 t/pod.t
-META.yml                                 Module meta-data (added by MakeMaker)
