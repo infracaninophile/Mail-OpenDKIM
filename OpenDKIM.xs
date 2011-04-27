@@ -339,11 +339,11 @@ call_signature_tagvalues_callback(void *user, dkim_param_t pcode, const unsigned
  * called when the OpenDKIMlibrary wants to call the callback function provided to
  * dkim_set_query_cancel
  */
-static int *
+static int
 call_dns_query_cancel_callback(void *a, void *b)
 {
 	dSP;
-	int count, *ret;
+	int count, ret;
 	SV *sv = dns_query_cancel_callback;
 
 	if(sv == NULL) {
@@ -363,10 +363,10 @@ call_dns_query_cancel_callback(void *a, void *b)
 	if(count != 1) {
 		croak("Internal error: dns_query_cancel_callback routine returned %d items, 1 was expected",
 			count);
-		return NULL;
+		return -1;
 	}
 
-	ret = (int *)POPp;
+	ret = POPi;
 
 	PUTBACK;
 	FREETMPS;
@@ -401,11 +401,11 @@ call_dns_query_service_callback(void *service)
  * called when the OpenDKIMlibrary wants to call the callback function provided to
  * dkim_set_query_start
  */
-static int *
+static int
 call_dns_query_start_callback(void *a, int b, unsigned char *c, unsigned char *d, size_t e, void **f)
 {
 	dSP;
-	int count, *ret;
+	int count, ret;
 	SV *sv = dns_query_start_callback;
 
 	if(sv == NULL) {
@@ -429,10 +429,10 @@ call_dns_query_start_callback(void *a, int b, unsigned char *c, unsigned char *d
 	if(count != 1) {
 		croak("Internal error: dns_query_start_callback routine returned %d items, 1 was expected",
 			count);
-		return NULL;
+		return -1;
 	}
 
-	ret = (int *)POPp;
+	ret = POPi;
 
 	PUTBACK;
 	FREETMPS;
@@ -445,11 +445,11 @@ call_dns_query_start_callback(void *a, int b, unsigned char *c, unsigned char *d
  * called when the OpenDKIMlibrary wants to call the callback function provided to
  * dkim_dns_set_query_waitreply
  */
-static int *
+static int
 call_dns_query_waitreply_callback(void *a, void *b, struct timeval *c, size_t *d, int *e, int *f)
 {
 	dSP;
-	int count, *ret;
+	int count, ret;
 	SV *sv = dns_query_start_callback;
 
 	if(sv == NULL) {
@@ -473,10 +473,10 @@ call_dns_query_waitreply_callback(void *a, void *b, struct timeval *c, size_t *d
 	if(count != 1) {
 		croak("Internal error: dns_query_waitreply_callback routine returned %d items, 1 was expected",
 			count);
-		return NULL;
+		return -1;
 	}
 
-	ret = (int *)POPp;
+	ret = POPi;
 
 	PUTBACK;
 	FREETMPS;
@@ -1294,7 +1294,7 @@ _dkim_sig_getsignedhdrs(dkim, sig, hdrs, hdrlen, nhdrs)
 DKIM_STAT
 _dkim_sig_getsigntime(sig, when)
 		DKIM_SIGINFO *sig
-		uint64_t when
+		time_t when
 	CODE:
 		RETVAL = dkim_sig_getsigntime(sig, &when);
 	OUTPUT:
