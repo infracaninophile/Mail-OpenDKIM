@@ -44,7 +44,7 @@ TODO: {
     "'version information here'"  => qr/to provide version information/,
   );
 
-  not_in_file_ok(Changes =>
+  not_in_file_ok(ChangeLog =>
     "placeholder date/time"       => qr(Date/time)
   );
 
