@@ -6,7 +6,7 @@ use warnings;
 
 =head1 NAME
 
-Mail::OpenDKIM::Signature - maintaines a DKIM signature for a message
+Mail::OpenDKIM::Signature - maintains a DKIM signature for a message
 
 =head1 SYNOPSIS
 
