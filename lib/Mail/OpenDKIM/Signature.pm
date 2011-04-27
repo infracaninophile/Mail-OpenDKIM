@@ -4,19 +4,16 @@ use 5.010000;
 use strict;
 use warnings;
 
-use Error qw(:try);
-use Carp;
-
 =head1 NAME
 
-Mail::OpenDKIM::Signature - generates a DKIM signature for a message
+Mail::OpenDKIM::Signature - maintaines a DKIM signature for a message
 
 =head1 SYNOPSIS
 
   use Mail::DKIM::Signature;
 
-  # create a signer object
-  my $dkim = Mail::OpenDKIM::Signature->new(
+  # create a signature object
+  my $sig = Mail::OpenDKIM::Signature->new(
   	Algorithm => 'rsa-sha1',
 	Method => 'relaxed',
 	Domain => 'example.org',
@@ -24,20 +21,15 @@ Mail::OpenDKIM::Signature - generates a DKIM signature for a message
 	KeyFile => 'private.key',
   );
 
-  # read an email and pass it into the signer, one line at a time
-  while(<STDIN>) {
-  	# remove local line terminators
-	chomp;
-	s/\015$//;
+  # Generate a signature
+  ...
+  my $signature = ...
+  # Store the signature
 
-	# use SMTP line terminators
-	$dkim->PRINT("$_\015\012");
-  }
-  $dkim->CLOSE();
+  $sig->data($signature)
 
-  # what is the signature result?
-  my $signature = $dkim->signature;
-  print $signature->as_string;
+  # Emit the email header line
+  print $sig->as_string() . "\r\n";
 
 =head1 DESCRIPTION
 
@@ -84,7 +76,7 @@ sub data
 
 =head2 as_string
 
-Returns the signature in a form suitable for inclusion in an e-mail
+Returns the signature in a form suitable for inclusion in an e-mail's header.
 
 =cut
 
@@ -102,6 +94,8 @@ This module exports nothing.
 =head1 SEE ALSO
 
 Mail::DKIM::Signature
+
+Mail::OpenDKIM::Signer
 
 =head1 NOTES
 
@@ -122,7 +116,6 @@ I will be notified, and then you'll automatically be notified of progress on you
 You can find documentation for this module with the perldoc command.
 
     perldoc Mail::OpenDKIM::Signature
-
 
 You can also look for information at:
 
@@ -154,8 +147,8 @@ http://www.mailermailer.com/
 
 =head1 COPYRIGHT AND LICENCE
 
-This module is Copyright 2011 Khera Communications, Inc.  It is
-licensed under the same terms as Perl itself.
+This module is Copyright 2011 Khera Communications, Inc.
+It is licensed under the same terms as Perl itself.
 
 =cut
 
