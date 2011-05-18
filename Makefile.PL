@@ -1,4 +1,3 @@
-#! /usr/local/bin/perl
 # $Id$
 use 5.010000;
 use ExtUtils::MakeMaker;
@@ -10,7 +9,7 @@ WriteMakefile(
 	 'Carp' => 0,
 	 },
     dist => { 
-	     PREOP => 'pod2text lib/Mail/OpenDKIM.pm > README',
+	     PREOP => 'pod2text lib/Mail/OpenDKIM.pm > README; ln -f README $(DISTVNAME)/README',
 	    },
     VERSION_FROM => 'lib/Mail/OpenDKIM.pm',
     AUTHOR => 'Nigel Horne <nigel@mailermailer.com>',
