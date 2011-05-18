@@ -58,6 +58,12 @@ Creates the signer.
 
 =cut
 
+# init the library only once.
+our $oh = Mail::OpenDKIM->new();
+INIT {
+  $oh->dkim_init();
+}
+
 sub new {
   my ($class, %args) = @_;
 
@@ -115,10 +121,6 @@ sub new {
     croak("Unsupported method: $b");
   }
 
-  my $oh = Mail::OpenDKIM->new();
-
-  $oh->dkim_init();
-
   my $signer;
 
   try {
@@ -137,7 +139,6 @@ sub new {
     croak($ex->stringify);
   };
 
-  $self->{_dkim_handle} = $oh;  # Mail::OpenDKIM object
   $self->{_signer} = $signer;  # Mail::OpenDKIM::DKIM object
   $self->{_signature} = Mail::OpenDKIM::Signature->new(%args);
 
@@ -213,9 +214,10 @@ sub DESTROY
   if($self->{_signer}) {
     $self->{_signer}->dkim_free();
   }
-  if($self->{_dkimlib_handle}) {
-    $self->{_dkimlib_handle}->dkim_close();
-  }
+}
+
+END {
+  $oh->dkim_close();
 }
 
 =head2 EXPORT
