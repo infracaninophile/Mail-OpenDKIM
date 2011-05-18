@@ -8,9 +8,6 @@ WriteMakefile(
 	 'Test::More' => 0.82,	# Needs new_ok
 	 'Carp' => 0,
 	 },
-    dist => { 
-	     PREOP => 'pod2text lib/Mail/OpenDKIM.pm > README; ln -f README $(DISTVNAME)/README',
-	    },
     VERSION_FROM => 'lib/Mail/OpenDKIM.pm',
     AUTHOR => 'Nigel Horne <nigel@mailermailer.com>',
     ABSTRACT => 'Provides an interface to OpenDKIM C library',
@@ -19,3 +16,12 @@ WriteMakefile(
     OBJECT => '$(O_FILES)', # link all the C files too
     LICENSE => 'perl',
 );
+
+sub MY::postamble {
+  return <<'MAKE_FRAG';
+all :: README
+
+README: lib/Mail/OpenDKIM.pm
+	pod2text $> > README
+MAKE_FRAG
+}
