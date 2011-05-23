@@ -657,6 +657,10 @@ You can also look for information at:
 
 =over 4
 
+=item * MailerMailer Project page
+
+L<http://www.mailermailer.com/labs/projects/Mail-OpenDKIM.rwp>
+
 =item * RT: CPAN's request tracker
 
 L<http://rt.cpan.org/NoAuth/Bugs.html?Dist=Mail-OpenDKIM>
