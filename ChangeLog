@@ -1,3 +1,7 @@
+2011-05-18  Vivek Khera  <vivek@mailermailer.com>
+
+	* lib/Mail/OpenDKIM/Signer.pm make dkim object a singleton.
+
 2011-04-27  Nigel Horne  <nigel@mailermailer.com>
 
 	* OpenDKIM Initial Release version 3186
