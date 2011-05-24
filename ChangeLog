@@ -1,3 +1,9 @@
+2011-05-24  Vivek Khera  <vivek@mailermailer.com>
+
+	* lib/Mail/OpenDKIM/Signer.pm fix incompatibility with mod_perl,
+	which does not run INIT blocks.  Do dkim_init on first call to
+	sign() method.
+
 2011-05-18  Vivek Khera  <vivek@mailermailer.com>
 
 	* lib/Mail/OpenDKIM/Signer.pm make dkim object a singleton.

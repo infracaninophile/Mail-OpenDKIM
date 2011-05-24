@@ -58,17 +58,21 @@ Creates the signer.
 
 =cut
 
-# init the library only once.
-our $oh = Mail::OpenDKIM->new();
-INIT {
-  $oh->dkim_init();
-}
+# singleton for the DKIM library handle object.
+# goes away when program exits.
+our $oh;
 
 sub new {
   my ($class, %args) = @_;
 
   my $self = {
   };
+
+  # on first time through, init the OpenDKIM library
+  unless ($oh) {
+    $oh = Mail::OpenDKIM->new();
+    $oh->dkim_init();
+  }
 
   my $algorithm;
 
@@ -217,7 +221,7 @@ sub DESTROY
 }
 
 END {
-  $oh->dkim_close();
+  $oh->dkim_close() if $oh;
 }
 
 =head2 EXPORT
