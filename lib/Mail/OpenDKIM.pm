@@ -73,7 +73,10 @@ use constant DKIM_SIGFLAG_IGNORE => 1;
 use constant DKIM_OP_GETOPT => 0;
 use constant DKIM_OP_SETOPT => 1;
 
+use constant DKIM_OPTS_FLAGS => 0;
 use constant DKIM_OPTS_TMPDIR => 1;
+
+use constant DKIM_LIBFLAGS_FIXCRLF => 0x0100;
 
 our @EXPORT_OK = ( @{ $EXPORT_TAGS{'all'} } );
 
@@ -130,7 +133,10 @@ our @EXPORT = qw(
   DKIM_OP_GETOPT
   DKIM_OP_SETOPT
 
+  DKIM_OPTS_FLAGS
   DKIM_OPTS_TMPDIR
+
+  DKIM_LIBFLAGS_FIXCRLF
 );
 
 use vars qw($VERSION);

@@ -211,6 +211,19 @@ sub signature
   return $self->{_signature};
 }
 
+=head2 dkim_options
+
+For further information, refer to http://www.opendkim.org/libopendkim/
+
+=cut
+
+sub dkim_options
+{
+  my ($self, $args) = @_;
+
+  return $oh->dkim_options($args);
+}
+
 sub DESTROY
 {
   my $self = shift;
