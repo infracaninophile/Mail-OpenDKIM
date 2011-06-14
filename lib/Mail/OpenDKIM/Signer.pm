@@ -20,7 +20,7 @@ Mail::OpenDKIM::Signer - generates a DKIM signature for a message
 
   # create a signer object
   my $dkim = Mail::OpenDKIM::Signer->new(
-  	Algorithm => 'rsa-sha1',
+	Algorithm => 'rsa-sha1',
 	Method => 'relaxed',
 	Domain => 'example.org',
 	Selector => 'selector1',
@@ -29,7 +29,7 @@ Mail::OpenDKIM::Signer - generates a DKIM signature for a message
 
   # read an email and pass it into the signer, one line at a time
   while(<STDIN>) {
-  	# remove local line terminators
+	# remove local line terminators
 	chomp;
 	s/\015$//;
 
@@ -235,6 +235,10 @@ Mail::DKIM::Signer
 =head1 NOTES
 
 This module does not yet implement all of the API of Mail::DKIM::Signer
+
+The PRINT method is expensive.  To increase performance we recommend that you
+minimise the number of calls to this function, perhaps by storing the message
+in a buffer before passing it to this function.
 
 =head1 AUTHOR
 
