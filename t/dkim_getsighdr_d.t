@@ -66,15 +66,27 @@ EOF
 		len => undef
 	};
 
-	$d->dkim_getsighdr_d($args);
+	my $version = sprintf("%x", Mail::OpenDKIM::dkim_libversion());
 
-	# diag("Buf = $$args{buf}");
+	if($version >= 2040000) {
+		# Will fail because the private key failed to load
+		ok($d->dkim_getsighdr_d($args) == DKIM_STAT_INVALID);
+		like($d->dkim_geterror(), qr/private key load failure/);
+		ok(1);
+		ok(1);
+		ok(1);
+	} else {
+		ok($d->dkim_getsighdr_d($args) == DKIM_STAT_OK);
 
-	ok(defined($$args{buf}));
-	ok(defined($$args{len}));
-	ok(length($$args{len}) > 0);
-	like($$args{buf}, qr/a=rsa-sha1/);
-	like($$args{buf}, qr/d=example.com/);
+		# diag("Buf = $$args{buf}");
+		# diag("Len = $$args{len}");
+
+		ok(defined($$args{buf}));
+		ok(defined($$args{len}));
+		ok(length($$args{len}) > 0);
+		like($$args{buf}, qr/a=rsa-sha1/);
+		like($$args{buf}, qr/d=example.com/);
+	}
 
 	ok($d->dkim_free() == DKIM_STAT_OK);
 

@@ -66,17 +66,31 @@ EOF
 		initial => 0
 	};
 
-	# 10 characters isn't long enough for a DKIM_SIGNATURE header
-	ok($d->dkim_getsighdr($args) == DKIM_STAT_NORESOURCE);
+	my $version = sprintf("%x", Mail::OpenDKIM::dkim_libversion());
+
+	if($version >= 2040000) {
+		# Will fail because the private key failed to load
+		ok($d->dkim_getsighdr($args) == DKIM_STAT_INVALID);
+	} else {
+		# 10 characters isn't long enough for a DKIM_SIGNATURE header
+		ok($d->dkim_getsighdr($args) == DKIM_STAT_NORESOURCE);
+	} 
 
 	$args->{len} = 256;
 
-	ok($d->dkim_getsighdr($args) == DKIM_STAT_OK);
+	if($version >= 2040000) {
+		# Will fail because the private key failed to load
+		ok($d->dkim_getsighdr($args) == DKIM_STAT_INVALID);
+		like($d->dkim_geterror(), qr/private key load failure/);
+		ok(1);
+	} else {
+		ok($d->dkim_getsighdr($args) == DKIM_STAT_OK);
 
-	# diag("Buf = $$args{buf}");
+		# diag("Buf = $$args{buf}");
 
-	like($$args{buf}, qr/a=rsa-sha1/);
-	like($$args{buf}, qr/d=example.com/);
+		like($$args{buf}, qr/a=rsa-sha1/);
+		like($$args{buf}, qr/d=example.com/);
+	}
 
 	ok($d->dkim_free() == DKIM_STAT_OK);
 

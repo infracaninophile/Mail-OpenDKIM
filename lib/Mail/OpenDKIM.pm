@@ -147,6 +147,8 @@ Mail::OpenDKIM - Provides an interface to libOpenDKIM
 
 =head1 SYNOPSIS
 
+ # sign outgoing message
+
  use Mail::DKIM::Signer;
 
  # create a signer object
@@ -172,6 +174,32 @@ Mail::OpenDKIM - Provides an interface to libOpenDKIM
  # what is the signature result?
  my $signature = $dkim->signature;
  print $signature->as_string;
+
+ # check validity of incoming message
+ my $o = Mail::OpenDKIM->new();
+ $o->dkim_init();
+
+ my $d = $o->dkim_verify({
+  id => 'MLM',
+ });
+
+ $msg =~ s/\n/\r\n/g;
+
+ $d->dkim_chunk({ chunkp => $msg, len => length($msg) });
+
+ $d->dkim_chunk({ chunkp => '', len => 0 });
+
+ $d->dkim_eom();
+
+ my $sig = $d->dkim_getsignature();
+
+ $d->dkim_sig_process({ sig => $sig });
+
+ printf "0x\n", $d->dkim_sig_getflags({ sig => $sig });
+
+ $d->dkim_free();
+
+ $o->dkim_close();
 
 =head1 DESCRIPTION
 
