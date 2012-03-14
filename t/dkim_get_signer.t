@@ -37,6 +37,7 @@ GET_SIGNER: {
 
 	my $signer = $d->dkim_get_signer();
 
+	# it is not ever set, so should be undef.
 	ok(!defined($signer));
 
 	$d->dkim_free();

@@ -846,7 +846,6 @@ sub dkim_policy_getreportinfo
 
   my $rc = Mail::OpenDKIM::_dkim_policy_getreportinfo($self->{_dkim_handle},
     $$args{addrbuf} ? $$args{addrbuf} : 0, $$args{addrlen},
-    $$args{fmtbuf} ? $$args{fmtbuf} : 0, $$args{fmtlen},
     $$args{optsbuf} ? $$args{optsbuf} : 0, $$args{optslen},
     $$args{smtpbuf} ? $$args{smtpbuf} : 0, $$args{smtplen},
     $interval);
@@ -1067,7 +1066,6 @@ sub dkim_sig_getreportinfo
     $$args{hfd} ? $$args{hfd} : 0,
     $$args{bfd} ? $$args{bfd} : 0,
     $$args{addrbuf} ? $$args{addrbuf} : 0, $$args{addrlen},
-    $$args{fmtbuf} ? $$args{fmtbuf} : 0, $$args{fmtlen},
     $$args{optsbuf} ? $$args{optsbuf} : 0, $$args{optslen},
     $$args{smtpbuf} ? $$args{smtpbuf} : 0, $$args{smtplen},
     $interval);

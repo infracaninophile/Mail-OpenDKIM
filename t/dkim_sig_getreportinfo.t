@@ -50,7 +50,6 @@ SIG_GETREPORTINFO: {
 	ok(defined($sig));
 
 	my $addrbuf = pack('B' x 80, 0 x 80);
-	my $fmtbuf = pack('B' x 80, 0 x 80);
 	my $optsbuf = pack('B' x 80, 0 x 80);
 	my $smtpbuf = pack('B' x 80, 0 x 80);
 
@@ -59,7 +58,6 @@ SIG_GETREPORTINFO: {
 		hfd => 0,
 		bfd => 0,
 		addrbuf => $addrbuf, addrlen => 80,
-		fmtbuf => $fmtbuf, fmtlen => 80,
 		optsbuf => $optsbuf, optslen => 80,
 		smtpbuf => $smtpbuf, smtplen => 80,
 	};

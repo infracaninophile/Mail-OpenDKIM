@@ -22,9 +22,9 @@ unless($libpath) {
 
 	# TODO: Windows, etc
 	unless($found) {
-		die 'Please install libopendkim >= 2.3 from http://www.opendkim.org/';
+		die 'Please install libopendkim >= 2.5 from http://www.opendkim.org/';
 	}
-	# TODO: Check the installed version is >= 2.3
+	# TODO: Check the installed version is >= 2.5
 }
 
 WriteMakefile(
@@ -35,7 +35,7 @@ WriteMakefile(
 	 'Carp' => 0,
 	 },
     VERSION_FROM => 'lib/Mail/OpenDKIM.pm',
-    AUTHOR => 'Nigel Horne <nigel@mailermailer.com>',
+    AUTHOR => 'Vivek Khera <vivek@khera.org>',
     ABSTRACT => 'Provides an interface to OpenDKIM C library',
     LIBS => ['-lopendkim'],
     INC => '-I/usr/local/include',

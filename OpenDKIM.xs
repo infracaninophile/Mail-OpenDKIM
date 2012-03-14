@@ -1,10 +1,9 @@
 /*
- * This module is Copyright 2011 Khera Communications, Inc.
+ * This module is Copyright 2012 Khera Communications, Inc.
  * It is licensed under the same terms as Perl itself.
  *
  * $Id$
  *
- * nigel@mailermailer.com
  */
 #include "EXTERN.h"
 #include "perl.h"
@@ -923,7 +922,7 @@ _dkim_get_user_context(dkim)
 DKIM_STAT
 _dkim_set_user_context(dkim, ctx)
 		DKIM *dkim
-		const void *ctx
+		void *ctx
 	CODE:
 		RETVAL = dkim_set_user_context(dkim, ctx);
 	OUTPUT:
@@ -1120,19 +1119,17 @@ _dkim_policy_state_free(pstate)
 		dkim_policy_state_free(pstate);
 
 DKIM_STAT
-_dkim_policy_getreportinfo(dkim, addrbuf, addrlen, fmtbuf, fmtlen, optsbuf, optslen, smtpbuf, smtplen, interval)
+_dkim_policy_getreportinfo(dkim, addrbuf, addrlen, optsbuf, optslen, smtpbuf, smtplen, interval)
 		DKIM *dkim
 		char *addrbuf
 		size_t addrlen
-		char *fmtbuf
-		size_t fmtlen
 		char *optsbuf
 		size_t optslen
 		char *smtpbuf
-		int smtplen
+		size_t smtplen
 		unsigned int interval = NO_INIT
 	CODE:
-		RETVAL = dkim_policy_getreportinfo(dkim, addrbuf, addrlen, fmtbuf, fmtlen, optsbuf, optslen, smtpbuf, smtplen, &interval);
+		RETVAL = dkim_policy_getreportinfo(dkim, addrbuf, addrlen, optsbuf, optslen, smtpbuf, smtplen, &interval);
 	OUTPUT:
 		interval
 		RETVAL
@@ -1240,22 +1237,20 @@ _dkim_sig_getkeysize(sig, bits)
 		RETVAL
 
 DKIM_STAT
-_dkim_sig_getreportinfo(dkim, sig, hfd, bfd, addrbuf, addrlen, fmtbuf, fmtlen, optsbuf, optslen, smtpbuf, smtplen, interval)
+_dkim_sig_getreportinfo(dkim, sig, hfd, bfd, addrbuf, addrlen, optsbuf, optslen, smtpbuf, smtplen, interval)
 		DKIM *dkim
 		DKIM_SIGINFO *sig
 		int *hfd
 		int *bfd
 		char *addrbuf
 		size_t addrlen
-		char *fmtbuf
-		size_t fmtlen
 		char *optsbuf
 		size_t optslen
 		char *smtpbuf
-		int smtplen
+		size_t smtplen
 		unsigned int interval = NO_INIT
 	CODE:
-		RETVAL = dkim_sig_getreportinfo(dkim, sig, hfd, bfd, addrbuf, addrlen, fmtbuf, fmtlen, optsbuf, optslen, smtpbuf, smtplen, &interval);
+		RETVAL = dkim_sig_getreportinfo(dkim, sig, hfd, bfd, addrbuf, addrlen, optsbuf, optslen, smtpbuf, smtplen, &interval);
 	OUTPUT:
 		interval
 		RETVAL

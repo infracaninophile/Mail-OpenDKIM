@@ -46,13 +46,11 @@ POLICY_GETDNSSEC: {
 	ok($d->dkim_eom() == DKIM_STAT_NOKEY);
 
 	my $addrbuf = 0 x 80;
-	my $fmtbuf = 0 x 80;
 	my $optsbuf = 0 x 80;
 	my $smtpbuf = 0 x 80;
 
 	my $args = {
 		addrbuf => $addrbuf, addrlen => 80,
-		fmtbuf => $fmtbuf, fmtlen => 80,
 		optsbuf => $optsbuf, optslen => 80,
 		smtpbuf => $smtpbuf, smtplen => 80,
 	};
