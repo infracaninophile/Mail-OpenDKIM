@@ -1,3 +1,8 @@
+2012-03-14  Vick Khera  <vivek@khera.org>
+
+	* lib/Mail/OpenDKIM.pm: updated for OpenDKIM 2.5.0 API; this is
+	  not backwards compatible with older OpenDKIM
+
 2011-06-16  Nigel Horne <nigel@mailermailer.com>
 	* fix tests that fail with OpenDKIM2.4.0
 	* Makefile.PL: added better (i.e. fatal) test to check that the
