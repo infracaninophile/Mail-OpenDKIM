@@ -80,6 +80,8 @@ t/dkim_sig_gettagvalue.t
 t/dkim_sig_process.t
 t/dkim_sig_syntax.t
 t/dkim_ssl_version.t
+t/kwalitee.t
 t/manifest.t
+t/pod-cm.t
 t/pod-coverage.t
 t/pod.t
