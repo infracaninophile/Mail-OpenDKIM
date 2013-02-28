@@ -1,6 +1,6 @@
 #!/usr/bin/perl -wT
 
-use Test::More tests => 19;
+use Test::More tests => 18;
 use Error qw(:try);
 BEGIN { use_ok('Mail::OpenDKIM') };
 
@@ -50,8 +50,6 @@ MINBODY: {
 	ok($d2->dkim_eoh() == DKIM_STAT_NOSIG);
 
 	my $m = $d1->dkim_minbody();
-
-	ok($d2->dkim_get_msgdate() == 0);	# No date header is given
 
 	ok(($m == 4294967295) || ($m == 18446744073709551615));	# Posix::ULONG_MAX
 	ok($d2->dkim_minbody() == 0);

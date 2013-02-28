@@ -1,21 +1,25 @@
 #!/usr/bin/perl -wT
 
-use Test::More tests => 5;
+use Test::More tests => 7;
 use Error qw(:try);
 BEGIN { use_ok('Mail::OpenDKIM') };
 
 #########################
 
 CACHE_STATS: {
-	my ($queries, $hits, $expired);
+	my ($queries, $hits, $expired, $keys);
 
 	my $args = {
 		queries => $queries,
 		hits => $hits,
-		expired => $expired
+		expired => $expired,
+		keys => $keys,
 	};
 
-	my $rc = Mail::OpenDKIM->dkim_getcachestats($args);
+	my $o = new_ok('Mail::OpenDKIM');
+	ok($o->dkim_init());
+
+	my $rc = $o->dkim_getcachestats($args);
 
 	ok(($rc == DKIM_STAT_OK) || ($rc == DKIM_STAT_NOTIMPLEMENT));
 

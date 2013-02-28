@@ -487,7 +487,7 @@ call_dns_query_waitreply_callback(void *a, void *b, struct timeval *c, size_t *d
 MODULE = Mail::OpenDKIM		PACKAGE = Mail::OpenDKIM
 PROTOTYPES: DISABLE
 
-# These routines are called directly from the user's Perl
+# These routines are called directly from the end user Perl code
 unsigned long
 dkim_ssl_version()
 	CODE:
@@ -589,6 +589,24 @@ _dkim_flush_cache(d)
 	OUTPUT:
 		RETVAL
 
+#if OPENDKIM_LIB_VERSION >= 0x02080000
+DKIM_STAT
+_dkim_getcachestats(libhandle, queries, hits, expired, keys)
+		DKIM_LIB *libhandle
+		unsigned int queries = NO_INIT
+		unsigned int hits = NO_INIT
+		unsigned int expired = NO_INIT
+		unsigned int keys = NO_INIT
+	CODE:
+		RETVAL = dkim_getcachestats(libhandle, &queries, &hits, &expired, &keys, 0);
+	OUTPUT:
+		queries
+		hits
+		expired
+		keys
+		RETVAL
+
+#else
 DKIM_STAT
 _dkim_getcachestats(queries, hits, expired)
 		unsigned int queries = NO_INIT
@@ -601,6 +619,8 @@ _dkim_getcachestats(queries, hits, expired)
 		hits
 		expired
 		RETVAL
+
+#endif
 
 DKIM *
 _dkim_sign(libhandle, id, secretkey, selector, domain, hdrcanon_alg, bodycanon_alg, sign_alg, length, statp)
@@ -620,7 +640,7 @@ _dkim_sign(libhandle, id, secretkey, selector, domain, hdrcanon_alg, bodycanon_a
 		statp
 		RETVAL
 
-# TODO: memclosure, if that's ever needed
+# TODO: memclosure, if that is ever needed
 DKIM *
 _dkim_verify(libhandle, id,  statp)
 		DKIM_LIB *libhandle
@@ -855,6 +875,8 @@ _dkim_getid(dkim)
 	OUTPUT:
 		RETVAL
 
+#if OPENDKIM_LIB_VERSION < 0x02080000
+
 uint64_t
 _dkim_get_msgdate(dkim)
 		DKIM *dkim
@@ -862,6 +884,8 @@ _dkim_get_msgdate(dkim)
 		RETVAL = dkim_get_msgdate(dkim);
 	OUTPUT:
 		RETVAL
+
+#endif
 
 DKIM_STAT
 _dkim_get_sigsubstring(dkim, sig, buf, buflen)
@@ -1002,6 +1026,7 @@ _dkim_getsignature(dkim)
 		RETVAL
 
 # Returns 3 values: $rc, $nsigs, @sigs
+
 void
 _dkim_getsiglist(dkim)
 		DKIM *dkim
