@@ -233,6 +233,10 @@ sub dkim_get_msgdate
 {
   my $self = shift;
 
+  if (Mail::OpenDKIM::dkim_libversion() >= 0x02070000) {
+    throw Error::Simple('dkim_get_msgdate not implemented in >= 2.7.0');
+  }
+
   unless($self->{_dkim_handle}) {
     throw Error::Simple('dkim_get_msgdate called before dkim_sign/dkim_verify');
   }
@@ -1490,7 +1494,7 @@ http://www.mailermailer.com/
 
 =head1 COPYRIGHT AND LICENCE
 
-This module is Copyright 2011 Khera Communications, Inc.
+This module is Copyright 2013 Khera Communications, Inc.
 It is licensed under the same terms as Perl itself.
 
 =cut

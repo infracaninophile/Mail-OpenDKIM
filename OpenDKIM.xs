@@ -875,7 +875,7 @@ _dkim_getid(dkim)
 	OUTPUT:
 		RETVAL
 
-#if OPENDKIM_LIB_VERSION < 0x02080000
+#if OPENDKIM_LIB_VERSION < 0x02070000
 
 uint64_t
 _dkim_get_msgdate(dkim)

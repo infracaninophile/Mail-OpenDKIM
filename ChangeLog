@@ -1,3 +1,14 @@
+2013-02-28  Vick Khera  <vivek@khera.org>
+
+	* OpenDKIM.xs: dkim_get_msgdate function seems to not be in 2.7
+	  either, cannot tell if it is in 2.6 so just disabling it if
+	  older than 2.7.
+
+2013-02-28  Vick Khera  <vivek@khera.org>
+
+	* lib/Mail/OpenDKIM.pm: updated to support OpenDKIM 2.8.0 API,
+	  keeping backwards compatibility with 2.7 API.
+
 2012-03-14  Vick Khera  <vivek@khera.org>
 
 	* lib/Mail/OpenDKIM.pm: updated for OpenDKIM 2.5.0 API; this is
