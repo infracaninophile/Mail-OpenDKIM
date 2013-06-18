@@ -49,7 +49,7 @@ OHDRS: {
 
 	my $sig = $d->dkim_getsignature();
 
-	my @ptrs = [ '', '', '', '', '' ];
+	my @ptrs = ( '', '', '', '', '' );
 	my $args = {
 		sig => $sig,
 		ptrs => \@ptrs,

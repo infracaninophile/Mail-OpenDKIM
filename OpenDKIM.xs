@@ -969,7 +969,7 @@ _dkim_diffheaders(dkim, canon, maxcost, ohdrs, nohdrs, out, nout)
 		DKIM *dkim
 		dkim_canon_t canon
 		int maxcost
-		char **ohdrs
+		char *&ohdrs
 		int nohdrs
 		struct dkim_hdrdiff *out = NO_INIT
 		int nout = NO_INIT

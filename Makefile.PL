@@ -41,6 +41,7 @@ WriteMakefile(
     INC => '-I/usr/local/include',
     OBJECT => '$(O_FILES)', # link all the C files too
     LICENSE => 'perl',
+    OPTIMIZE => '-O0',          # -O2 errors with perl 5.16, gcc 4.2.1, FreeBSD 9.1
 );
 
 sub MY::postamble {
