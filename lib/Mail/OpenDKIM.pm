@@ -635,7 +635,7 @@ sub DESTROY
 {
   my $self = shift;
 
-  if($self->{_dkimlib_handle}) {
+  if ($self->{_dkimlib_handle}) {
     $self->dkim_close();
   }
 }
