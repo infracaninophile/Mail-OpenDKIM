@@ -1,3 +1,10 @@
+2013-06-18  Vick Khera  <vivek@khera.org>
+
+	* OpenDKIM.xs: char ** pointers break in 5.16, use char *& in
+	  function _dkim_diffheaders().
+	* Makefile.PL: -O2 causes _dkim_ohdrs() to segfault with perl 5.16
+	  and gcc 4.2.1 on FreeBSD 9.1, so build instead with -O0.
+
 2013-02-28  Vick Khera  <vivek@khera.org>
 
 	* OpenDKIM.xs: dkim_get_msgdate function seems to not be in 2.7
