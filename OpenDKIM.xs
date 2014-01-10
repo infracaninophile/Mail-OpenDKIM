@@ -347,7 +347,7 @@ call_dns_query_cancel_callback(void *a, void *b)
 
 	if(sv == NULL) {
 		croak("Internal error: call_dns_query_cancel called, but nothing to call");
-		return;
+		return -1;
 	}
 
 	PUSHMARK(SP);
@@ -409,7 +409,7 @@ call_dns_query_start_callback(void *a, int b, unsigned char *c, unsigned char *d
 
 	if(sv == NULL) {
 		croak("Internal error: call_dns_query_service called, but nothing to call");
-		return;
+		return -1;
 	}
 
 	PUSHMARK(SP);
@@ -453,7 +453,7 @@ call_dns_query_waitreply_callback(void *a, void *b, struct timeval *c, size_t *d
 
 	if(sv == NULL) {
 		croak("Internal error: call_dns_query_service called, but nothing to call");
-		return;
+		return -1;
 	}
 
 	PUSHMARK(SP);
