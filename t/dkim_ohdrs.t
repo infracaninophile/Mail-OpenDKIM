@@ -20,7 +20,7 @@ EOF
 OHDRS: {
 
 	my $o = new_ok('Mail::OpenDKIM');
-	ok($o->dkim_init());
+	ok($o->dkim_init(),'Init');
 
 	my $d;
 
@@ -29,7 +29,7 @@ OHDRS: {
 			id => 'MLM',
 		});
 
-		ok(defined($d));
+		ok(defined($d),'Verify');
 
 		# d is a Mail::OpenDKIM::DKIM object
 	} catch Error with {
@@ -41,11 +41,11 @@ OHDRS: {
 
 	$msg =~ s/\n/\r\n/g;
 
-	ok($d->dkim_chunk({ chunkp => $msg, len => length($msg)}) == DKIM_STAT_OK);
+	ok($d->dkim_chunk({ chunkp => $msg, len => length($msg)}) == DKIM_STAT_OK,'Msg Chunk');
 
-	ok($d->dkim_chunk({ chunkp => '', len => 0}) == DKIM_STAT_OK);
+	ok($d->dkim_chunk({ chunkp => '', len => 0}) == DKIM_STAT_OK,'Empty Chunk');
 
-	ok($d->dkim_eom() == DKIM_STAT_NOKEY);
+	ok($d->dkim_eom() == DKIM_STAT_NOKEY,'EOM');
 
 	my $sig = $d->dkim_getsignature();
 
@@ -56,12 +56,12 @@ OHDRS: {
 		cnt => 5
 	};
 
-	ok($d->dkim_ohdrs($args) == DKIM_STAT_OK);
+	ok($d->dkim_ohdrs($args) == DKIM_STAT_OK,'ohdrs');
 
 	# There are no z= headers
-	ok($$args{cnt} == 0);
+	ok($$args{cnt} == 0,'no z= headers');
 
-	ok($d->dkim_free() == DKIM_STAT_OK);
+	ok($d->dkim_free() == DKIM_STAT_OK,'free');
 
 	$o->dkim_close();
 }

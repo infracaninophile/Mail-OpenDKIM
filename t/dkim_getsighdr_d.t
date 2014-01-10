@@ -22,7 +22,7 @@ Can you hear me, Mother?
 EOF
 
 	my $o = new_ok('Mail::OpenDKIM');
-	ok($o->dkim_init());
+	ok($o->dkim_init(),'Init');
 
 	my $d;
 
@@ -38,7 +38,7 @@ EOF
 			length => -1,
 		});
 
-		ok(defined($d));
+		ok(defined($d),'sign');
 
 		# d is a Mail::OpenDKIM::DKIM object
 	} catch Error with {
@@ -50,15 +50,15 @@ EOF
 
 	$msg =~ s/\n/\r\n/g;
 
-	ok($d->dkim_chunk({ chunkp => $msg, len => length($msg) }) == DKIM_STAT_OK);
+	ok($d->dkim_chunk({ chunkp => $msg, len => length($msg) }) == DKIM_STAT_OK,'msg chunk');
 
 	# Flag no more data to come
-	ok($d->dkim_chunk({ chunkp => '', len => 0 }) == DKIM_STAT_OK);
+	ok($d->dkim_chunk({ chunkp => '', len => 0 }) == DKIM_STAT_OK,'empty chunk');
 
 	# Will fail because the secret key isn't valid
-	ok($d->dkim_eom() == DKIM_STAT_NORESOURCE);
+	ok($d->dkim_eom() == DKIM_STAT_NORESOURCE,'eom');
 
-	ok($d->dkim_geterror() eq 'd2i_PrivateKey_bio() failed');
+	ok($d->dkim_geterror() eq 'd2i_PrivateKey_bio() failed','key failure');
 
 	my $args = {
 		initial => 0,
@@ -68,27 +68,29 @@ EOF
 
 	my $version = sprintf("%x", Mail::OpenDKIM::dkim_libversion());
 
+	diag($version);
+
 	if($version >= 2040000) {
 		# Will fail because the private key failed to load
-		ok($d->dkim_getsighdr_d($args) == DKIM_STAT_INVALID);
+		ok($d->dkim_getsighdr_d($args) == DKIM_STAT_INVALID,'getsighdr_d');
 		like($d->dkim_geterror(), qr/private key load failure/);
 		ok(1);
 		ok(1);
 		ok(1);
 	} else {
-		ok($d->dkim_getsighdr_d($args) == DKIM_STAT_OK);
+		ok($d->dkim_getsighdr_d($args) == DKIM_STAT_OK,'getsighdr_d');
 
 		# diag("Buf = $$args{buf}");
 		# diag("Len = $$args{len}");
 
-		ok(defined($$args{buf}));
-		ok(defined($$args{len}));
-		ok(length($$args{len}) > 0);
-		like($$args{buf}, qr/a=rsa-sha1/);
-		like($$args{buf}, qr/d=example.com/);
+		ok(defined($$args{buf}),'buf');
+		ok(defined($$args{len}),'len');
+		ok(length($$args{len}) > 0,'len > 0');
+		like($$args{buf}, qr/a=rsa-sha1/,'sha1');
+		like($$args{buf}, qr/d=example.com/,'example.com');
 	}
 
-	ok($d->dkim_free() == DKIM_STAT_OK);
+	ok($d->dkim_free() == DKIM_STAT_OK,'free');
 
 	$o->dkim_close();
 
