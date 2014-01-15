@@ -1,3 +1,8 @@
+2014-01-15  Vick Khera  <vivek@khera.org>
+
+	* OpenDKIM.xs: some compilers complain about return without value
+	on non-void functions so always return a value.
+
 2013-06-18  Vick Khera  <vivek@khera.org>
 
 	* OpenDKIM.xs: char ** pointers break in 5.16, use char *& in
