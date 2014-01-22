@@ -223,7 +223,7 @@ sub dkim_getid
   return Mail::OpenDKIM::_dkim_getid($self->{_dkim_handle});
 }
 
-=head2 dkim_msgdate
+=head2 dkim_get_msgdate
 
 For further information, refer to http://www.opendkim.org/libopendkim/
 
@@ -244,7 +244,7 @@ sub dkim_get_msgdate
   return Mail::OpenDKIM::_dkim_get_msgdate($self->{_dkim_handle});
 }
 
-=head2 dkim_get_sig_substring
+=head2 dkim_get_sigsubstring
 
 For further information, refer to http://www.opendkim.org/libopendkim/
 
@@ -660,6 +660,12 @@ sub dkim_set_prescreen
 
   return Mail::OpenDKIM::_dkim_set_prescreen($self->{_dkimlib_handle}, $$args{func});
 }
+
+=head2 dkim_getpartial
+
+For further information, refer to http://www.opendkim.org/libopendkim/
+
+=cut
 
 sub dkim_getpartial
 {

@@ -644,9 +644,33 @@ sub DESTROY
 
 Static method.
 
+=head2 dkim_ssl_version
+
+Static method.
+
 =head2 dkim_getcachestats
 
 Static method.
+
+=head2 dkim_getpolicystr
+
+Calls C routine of same name.
+
+=head2 dkim_getpresultstr
+
+Calls C routine of same name.
+
+=head2 dkim_getresultstr
+
+Calls C routine of same name.
+
+=head2 dkim_sig_geterrorstr
+
+Calls C routine of same name.
+
+=head2 dkim_mail_parse
+
+Calls C routine of same name.
 
 =head1 EXPORT
 
