@@ -50,8 +50,8 @@ isa_ok($signature, 'Mail::OpenDKIM::Signature');
 
 my $sig = $signature->as_string;
 
-ok(defined($sig));
+ok(defined($sig),'got a signature');
 
-like($sig, qr/^DKIM-Signature: /);
-like($sig, qr/a=rsa-sha1/);
-like($sig, qr/d=example.com/);
+like($sig, qr/^DKIM-Signature: /,'signature header');
+like($sig, qr/a=rsa-sha1/,'signature type rsa-sha1');
+like($sig, qr/d=example.com/,'signature domain example.com');
