@@ -1008,7 +1008,7 @@ DKIM_STAT
 _dkim_getsighdr_d(dkim, initial, buf, len)
 		DKIM *dkim
 		size_t initial
-		unsigned char &buf = NO_INIT
+		unsigned char *&buf = NO_INIT
 		size_t len = NO_INIT
 	CODE:
 		RETVAL = dkim_getsighdr_d(dkim, initial, &buf, &len);

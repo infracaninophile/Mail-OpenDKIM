@@ -5,9 +5,10 @@
 
 #########################
 
-use Test::More tests => 16;
+use Test::More tests => 14;
 use Error qw(:try);
 BEGIN { use_ok('Mail::OpenDKIM') };
+BEGIN { use_ok('Mail::OpenDKIM::PrivateKey') };
 
 #########################
 
@@ -25,11 +26,12 @@ EOF
 	ok($o->dkim_init(),'Init');
 
 	my $d;
+        my $pk = Mail::OpenDKIM::PrivateKey->load(File => 't/example.key');
 
 	try {
 		$d = $o->dkim_sign({
 			id => 'MLM',
-			secretkey => '11111',
+			secretkey => $pk->data(),
 			selector => 'example',
 			domain => 'example.com',
 			hdrcanon_alg => DKIM_CANON_RELAXED,
@@ -55,10 +57,7 @@ EOF
 	# Flag no more data to come
 	ok($d->dkim_chunk({ chunkp => '', len => 0 }) == DKIM_STAT_OK,'empty chunk');
 
-	# Will fail because the secret key isn't valid
-	ok($d->dkim_eom() == DKIM_STAT_NORESOURCE,'eom');
-
-	ok($d->dkim_geterror() eq 'd2i_PrivateKey_bio() failed','key failure');
+	ok($d->dkim_eom() == DKIM_STAT_OK,'eom');
 
 	my $args = {
 		initial => 0,
@@ -66,29 +65,9 @@ EOF
 		len => undef
 	};
 
-	my $version = sprintf("%x", Mail::OpenDKIM::dkim_libversion());
-
-	diag("opendkim lib version=$version");
-
-	if($version >= 2040000) {
-		# Will fail because the private key failed to load
-		ok($d->dkim_getsighdr_d($args) == DKIM_STAT_INVALID,'getsighdr_d');
-		like($d->dkim_geterror(), qr/private key load failure/);
-		ok(1,'filler for test for old version');
-		ok(1,'filler for test for old version');
-		ok(1,'filler for test for old version');
-	} else {
-		ok($d->dkim_getsighdr_d($args) == DKIM_STAT_OK,'getsighdr_d');
-
-		# diag("Buf = $$args{buf}");
-		# diag("Len = $$args{len}");
-
-		ok(defined($$args{buf}),'buf');
-		ok(defined($$args{len}),'len');
-		ok(length($$args{len}) > 0,'len > 0');
-		like($$args{buf}, qr/a=rsa-sha1/,'sha1');
-		like($$args{buf}, qr/d=example.com/,'example.com');
-	}
+	ok($d->dkim_getsighdr_d($args) == DKIM_STAT_OK,'getsighdr_d');
+	like($$args{buf}, qr/a=rsa-sha1/,'sha1');
+	like($$args{buf}, qr/d=example.com/,'example.com');
 
 	ok($d->dkim_free() == DKIM_STAT_OK,'free');
 
