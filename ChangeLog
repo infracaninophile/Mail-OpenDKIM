@@ -1,3 +1,7 @@
+2015-08-28  Matthew Seaman <m.seaman@infracaninophile.co.uk>
+
+	* typemap: remove now unused policy-related types.
+	* lib/Mail/OpenDKIM.pm: new version 4203
 
 2015-08-26  Matthew Seaman <m.seaman@infracaninophile.co.uk>
 
