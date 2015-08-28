@@ -156,6 +156,9 @@ SEE ALSO
 
     RFC 4870, RFC 4871
 
+REPOSITORY
+    <https://github.com/infracaninophile/Mail-OpenDKIM.git>
+
 DEPENDENCIES
     This module requires these other modules and libraries:
 
@@ -184,6 +187,8 @@ AUTHOR
     Nigel Horne
 
     Vick Khera, "<vivek at khera.org>"
+
+    Matthew Seaman, "<m.seaman@infracaninophile.co.uk>"
 
 SUPPORT
     You can find documentation for this module with the perldoc command.
@@ -217,6 +222,6 @@ SPONSOR
     http://www.mailermailer.com/
 
 COPYRIGHT AND LICENCE
-    This module is Copyright 2014 Khera Communications, Inc. It is licensed
-    under the same terms as Perl itself.
+    This module is Copyright 2014 Khera Communications, Inc. Copyright 2015
+    Matthew Seaman It is licensed under the same terms as Perl itself.
 
