@@ -920,6 +920,10 @@ http://www.opendkim.org/libopendkim/
 
 RFC 4870, RFC 4871
 
+=head1 REPOSITORY
+
+L<https://github.com/infracaninophile/Mail-OpenDKIM.git>
+
 =head1 DEPENDENCIES
 
 This module requires these other modules and libraries:
@@ -949,6 +953,8 @@ Feedback will be greatfully received.
 Nigel Horne
 
 Vick Khera, C<< <vivek at khera.org> >>
+
+Matthew Seaman, C<< <m.seaman@infracaninophile.co.uk> >>
 
 =head1 SUPPORT
 
@@ -991,6 +997,7 @@ http://www.mailermailer.com/
 =head1 COPYRIGHT AND LICENCE
 
 This module is Copyright 2014 Khera Communications, Inc.
+Copyright 2015 Matthew Seaman
 It is licensed under the same terms as Perl itself.
 
 =cut
