@@ -1,4 +1,3 @@
-# $Id$
 use 5.010000;
 use ExtUtils::MakeMaker;
 use Config;

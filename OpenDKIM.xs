@@ -1,9 +1,7 @@
 /*
  * This module is Copyright 2012 Khera Communications, Inc.
+ * Copyright 2015 Matthew Seaman
  * It is licensed under the same terms as Perl itself.
- *
- * $Id$
- *
  */
 #include "EXTERN.h"
 #include "perl.h"
