@@ -21,9 +21,9 @@ unless($libpath) {
 
 	# TODO: Windows, etc
 	unless($found) {
-		die 'Please install libopendkim >= 2.5 from http://www.opendkim.org/';
+		die 'Please install libopendkim >= 2.10 from http://www.opendkim.org/';
 	}
-	# TODO: Check the installed version is >= 2.5
+	# TODO: Check the installed version is >= 2.10
 }
 
 WriteMakefile(
