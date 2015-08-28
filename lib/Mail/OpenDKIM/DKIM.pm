@@ -587,38 +587,6 @@ sub dkim_diffheaders
   return $rc;
 }
 
-=head2 dkim_get_reputation
-
-For further information, refer to http://www.opendkim.org/libopendkim/
-
-=cut
-
-sub dkim_get_reputation
-{
-  my ($self, $args) = @_;
-
-  unless($self->{_dkim_handle}) {
-    throw Error::Simple('dkim_get_reputation called before dkim_verify');
-  }
-  foreach(qw(sig qroot)) {
-    exists($$args{$_}) or throw Error::Simple("dkim_get_reputation missing argument '$_'");
-    defined($$args{$_}) or throw Error::Simple("dkim_get_reputation undefined argument '$_'");
-  }
-
-  my $rep;
-
-  my $rc = Mail::OpenDKIM::_dkim_get_reputation($self->{_dkim_handle}, $$args{sig}, $$args{qroot}, $rep);
-
-  if($rc == DKIM_STAT_OK) {
-    $$args{rep} = $rep;
-  }
-  else {
-    $$args{rep} = undef;
-  }
-
-  return $rc;
-}
-
 =head2 dkim_set_final
 
 For further information, refer to http://www.opendkim.org/libopendkim/
@@ -765,144 +733,6 @@ sub dkim_getmode
   }
 
   return Mail::OpenDKIM::_dkim_getmode($self->{_dkim_handle});
-}
-
-=head2 dkim_policy
-
-For further information, refer to http://www.opendkim.org/libopendkim/
-
-=cut
-
-sub dkim_policy
-{
-  my ($self, $args) = @_;
-
-  unless($self->{_dkim_handle}) {
-    throw Error::Simple('dkim_policy called before dkim_verify');
-  }
-
-  my ($pcode, $pflags);
-
-  my $rc = Mail::OpenDKIM::_dkim_policy($self->{_dkim_handle}, $pcode, $pflags, $$args{pstate} ? $$args{pstate} : 0);
-
-  if($rc == DKIM_STAT_OK) {
-    $$args{pcode} = $pcode;
-    $$args{pflags} = $pflags;
-  }
-  else {
-    $$args{pcode} = undef;
-    $$args{pflags} = undef;
-  }
-
-  return $rc;
-}
-
-=head2 dkim_policy_state_new
-
-For further information, refer to http://www.opendkim.org/libopendkim/
-
-=cut
-
-sub dkim_policy_state_new
-{
-  my $self = shift;
-
-  unless($self->{_dkim_handle}) {
-    throw Error::Simple('dkim_policy_state_new called before dkim_verify');
-  }
-
-  return Mail::OpenDKIM::_dkim_policy_state_new($self->{_dkim_handle});
-}
-
-=head2 dkim_policy_state_free
-
-For further information, refer to http://www.opendkim.org/libopendkim/
-
-The given value of pstate is ignored.
-The value sent to libOpenDKIM is always NULL.
-
-=cut
-
-sub dkim_policy_state_free
-{
-  my ($self, $args) = @_;
-
-  unless($self->{_dkim_handle}) {
-    throw Error::Simple('dkim_policy_state_free called before dkim_verify');
-  }
-  foreach(qw(pstate)) {
-    exists($$args{$_}) or throw Error::Simple("dkim_policy_state_free missing argument '$_'");
-    defined($$args{$_}) or throw Error::Simple("dkim_policy_state_free undefined argument '$_'");
-  }
-
-  return Mail::OpenDKIM::_dkim_policy_state_free($$args{pstate});
-}
-
-=head2 dkim_policy_getreportinfo
-
-For further information, refer to http://www.opendkim.org/libopendkim/
-
-=cut
-
-sub dkim_policy_getreportinfo
-{
-  my ($self, $args) = @_;
-
-  unless($self->{_dkim_handle}) {
-    throw Error::Simple('dkim_policy_getreportinfo called before dkim_verify');
-  }
-
-  my $interval = -1;
-
-  my $rc = Mail::OpenDKIM::_dkim_policy_getreportinfo($self->{_dkim_handle},
-    $$args{addrbuf} ? $$args{addrbuf} : 0, $$args{addrlen},
-    $$args{optsbuf} ? $$args{optsbuf} : 0, $$args{optslen},
-    $$args{smtpbuf} ? $$args{smtpbuf} : 0, $$args{smtplen},
-    $interval);
-
-  if($rc == DKIM_STAT_OK) {
-    $$args{interval} = $interval;
-  }
-
-  return $rc;
-}
-
-=head2 dkim_policy_getdnssec
-
-For further information, refer to http://www.opendkim.org/libopendkim/
-
-=cut
-
-sub dkim_policy_getdnssec
-{
-  my $self = shift;
-
-  unless($self->{_dkim_handle}) {
-    throw Error::Simple('dkim_policy_getdnssec called before dkim_verify');
-  }
-
-  return Mail::OpenDKIM::_dkim_policy_getdnssec($self->{_dkim_handle});
-}
-
-=head2 dkim_policy_syntax
-
-For further information, refer to http://www.opendkim.org/libopendkim/
-
-=cut
-
-sub dkim_policy_syntax
-{
-  my ($self, $args) = @_;
-
-  unless($self->{_dkim_handle}) {
-    throw Error::Simple('dkim_policy_syntax called before dkim_verify');
-  }
-  foreach(qw(str len)) {
-    exists($$args{$_}) or throw Error::Simple("dkim_policy_syntax missing argument '$_'");
-    defined($$args{$_}) or throw Error::Simple("dkim_policy_syntax undefined argument '$_'");
-  }
-
-  return Mail::OpenDKIM::_dkim_policy_syntax($self->{_dkim_handle}, $$args{str}, $$args{len});
 }
 
 =head2 dkim_sig_syntax
@@ -1063,7 +893,7 @@ sub dkim_sig_getreportinfo
   my ($self, $args) = @_;
 
   unless($self->{_dkim_handle}) {
-    throw Error::Simple('dkim_policy_getreportinfo called before dkim_verify');
+    throw Error::Simple('dkim_sig_getreportinfo called before dkim_verify');
   }
 
   foreach(qw(sig)) {

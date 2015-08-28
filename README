@@ -104,9 +104,6 @@ SUBROUTINES/METHODS
   dkim_set_key_lookup
     For further information, refer to http://www.opendkim.org/libopendkim/
 
-  dkim_set_policy_lookup
-    For further information, refer to http://www.opendkim.org/libopendkim/
-
   dkim_set_signature_handle
     For further information, refer to http://www.opendkim.org/libopendkim/
 
@@ -140,12 +137,6 @@ SUBROUTINES/METHODS
   dkim_getcachestats
     Static method.
 
-  dkim_getpolicystr
-    Calls C routine of same name.
-
-  dkim_getpresultstr
-    Calls C routine of same name.
-
   dkim_getresultstr
     Calls C routine of same name.
 
@@ -169,11 +160,11 @@ DEPENDENCIES
     This module requires these other modules and libraries:
 
       Test::More
-      libOpenDKIM 2.3 (http://www.opendkim.org/libopendkim/)
+      libOpenDKIM 2.10 (http://www.opendkim.org/libopendkim/)
       C compiler
 
 NOTES
-    Tested against libOpenDKIM 2.3.1. Known to fail to compile against 2.2.
+    Tested against libOpenDKIM 2.10.3.
 
     Only portions of Mail::DKIM::Signer interface, and the support for it,
     have been implemented.

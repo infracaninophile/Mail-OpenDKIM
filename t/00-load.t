@@ -10,7 +10,8 @@ BEGIN {
     use_ok( 'Mail::OpenDKIM::Signer' ) || print "Bail out!";
 }
 
-my $version = sprintf("%x", Mail::OpenDKIM::dkim_libversion());
-ok($version >= 2030000);	# Needs at least version 2.3
+my $version = Mail::OpenDKIM::dkim_libversion();
+ok($version >= 0x20a0000);	# Needs at least version 2.10
 
+$version = sprintf("%x", $version);
 diag ("Testing Mail::OpenDKIM $Mail::OpenDKIM::VERSION, Perl $], OpenDKIM $version, $^X");

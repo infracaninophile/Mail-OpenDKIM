@@ -29,9 +29,6 @@ t/dkim_getcachestats.t
 t/dkim_getdomain.t
 t/dkim_getmode.t
 t/dkim_getpartial.t
-t/dkim_getpolicystr.t
-t/dkim_getpresult.t
-t/dkim_getpresultstr.t
 t/dkim_getresultstr.t
 t/dkim_getsighdr.t
 t/dkim_getsighdr_d.t
@@ -44,16 +41,10 @@ t/dkim_mail_parse.t
 t/dkim_minbody.t
 t/dkim_ohdrs.t
 t/dkim_options.t
-t/dkim_policy.t
-t/dkim_policy_getdnssec.t
-t/dkim_policy_getreportinfo.t
-t/dkim_policy_state.t
-t/dkim_policy_syntax.t
 t/dkim_set_dns_callback.t
 t/dkim_set_final.t
 t/dkim_set_key_lookup.t
 t/dkim_set_margin.t
-t/dkim_set_policy_lookup.t
 t/dkim_set_prescreen.t
 t/dkim_set_signature_handle.t
 t/dkim_set_signature_handle_free.t

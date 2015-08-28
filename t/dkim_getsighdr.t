@@ -66,9 +66,9 @@ EOF
 		initial => 0
 	};
 
-	my $version = sprintf("%x", Mail::OpenDKIM::dkim_libversion());
+	my $version = Mail::OpenDKIM::dkim_libversion();
 
-	if($version >= 2040000) {
+	if($version >= 0x2040000) {
 		# Will fail because the private key failed to load
 		ok($d->dkim_getsighdr($args) == DKIM_STAT_INVALID);
 	} else {

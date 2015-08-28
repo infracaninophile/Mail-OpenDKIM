@@ -20,46 +20,186 @@ our %EXPORT_TAGS = ( 'all' => [ qw(
 
 ) ] );
 
-use constant DKIM_CANON_SIMPLE => 0;  # RFC4871
-use constant DKIM_CANON_RELAXED => 1;  # RFC4871
+## Sourced from dkim.h
+
+use constant DKIM_STAT_OK => 0;             # function completed successfully
+use constant DKIM_STAT_BADSIG => 1;         # signature available but failed
+use constant DKIM_STAT_NOSIG => 2;          # no signature available
+use constant DKIM_STAT_NOKEY => 3;          # public key not found
+use constant DKIM_STAT_CANTVRFY => 4;       # can't get domain key to verify
+use constant DKIM_STAT_SYNTAX => 5;         # message is not valid syntax
+use constant DKIM_STAT_NORESOURCE => 6;     # resource unavailable
+use constant DKIM_STAT_INTERNAL => 7;       # internal error
+use constant DKIM_STAT_REVOKED => 8;        # key found, but revoked
+use constant DKIM_STAT_INVALID => 9;        # invalid function parameter
+use constant DKIM_STAT_NOTIMPLEMENT => 10;  # function not implemented
+use constant DKIM_STAT_KEYFAIL => 11;       # key retrieval failed
+use constant DKIM_STAT_CBREJECT => 12;      # callback requested reject
+use constant DKIM_STAT_CBINVALID => 13;     # callback gave invalid result
+use constant DKIM_STAT_CBTRYAGAIN => 14;    # callback says try again later
+use constant DKIM_STAT_CBERROR => 15;       # callback error
+use constant DKIM_STAT_MULTIDNSREPLY => 16; # multiple DNS replies
+use constant DKIM_STAT_SIGGEN => 17;        # signature generation failed
+
+use constant DKIM_CBSTAT_CONTINUE => 0;     # continue
+use constant DKIM_CBSTAT_REJECT => 1;       # reject
+use constant DKIM_CBSTAT_TRYAGAIN => 2;     # try again later
+use constant DKIM_CBSTAT_NOTFOUND => 3;     # requested record not found
+use constant DKIM_CBSTAT_ERROR => 4;        # error requesting record
+use constant DKIM_CBSTAT_DEFAULT => 5;      # bypass; use default handling
+
+use constant DKIM_SIGERROR_UNKNOWN => -1;         # unknown error
+use constant DKIM_SIGERROR_OK => 0;               # no error
+use constant DKIM_SIGERROR_VERSION => 1;          # unsupported version
+use constant DKIM_SIGERROR_DOMAIN => 2;           # invalid domain (d=/i=)
+use constant DKIM_SIGERROR_EXPIRED => 3;          # signature expired
+use constant DKIM_SIGERROR_FUTURE => 4;           # signature in the future
+use constant DKIM_SIGERROR_TIMESTAMPS => 5;       # x= < t=
+use constant DKIM_SIGERROR_UNUSED => 6;           # OBSOLETE
+use constant DKIM_SIGERROR_INVALID_HC => 7;       # c= invalid (header)
+use constant DKIM_SIGERROR_INVALID_BC => 8;       # c= invalid (body)
+use constant DKIM_SIGERROR_MISSING_A => 9;        # a= missing
+use constant DKIM_SIGERROR_INVALID_A => 10;       # a= invalid
+use constant DKIM_SIGERROR_MISSING_H => 11;       # h= missing
+use constant DKIM_SIGERROR_INVALID_L => 12;       # l= invalid
+use constant DKIM_SIGERROR_INVALID_Q => 13;       # q= invalid
+use constant DKIM_SIGERROR_INVALID_QO => 14;      # q= option invalid
+use constant DKIM_SIGERROR_MISSING_D => 15;       # d= missing
+use constant DKIM_SIGERROR_EMPTY_D => 16;         # d= empty
+use constant DKIM_SIGERROR_MISSING_S => 17;       # s= missing
+use constant DKIM_SIGERROR_EMPTY_S => 18;         # s= empty
+use constant DKIM_SIGERROR_MISSING_B => 19;       # b= missing
+use constant DKIM_SIGERROR_EMPTY_B => 20;         # b= empty
+use constant DKIM_SIGERROR_CORRUPT_B => 21;       # b= corrupt
+use constant DKIM_SIGERROR_NOKEY => 22;           # no key found in DNS
+use constant DKIM_SIGERROR_DNSSYNTAX => 23;       # DNS reply corrupt
+use constant DKIM_SIGERROR_KEYFAIL => 24;         # DNS query failed
+use constant DKIM_SIGERROR_MISSING_BH => 25;      # bh= missing
+use constant DKIM_SIGERROR_EMPTY_BH => 26;        # bh= empty
+use constant DKIM_SIGERROR_CORRUPT_BH => 27;      # bh= corrupt
+use constant DKIM_SIGERROR_BADSIG => 28;          # signature mismatch
+use constant DKIM_SIGERROR_SUBDOMAIN => 29;       # unauthorized subdomain
+use constant DKIM_SIGERROR_MULTIREPLY => 30;      # multiple records returned
+use constant DKIM_SIGERROR_EMPTY_H => 31;         # h= empty
+use constant DKIM_SIGERROR_INVALID_H => 32;       # h= missing req'd entries
+use constant DKIM_SIGERROR_TOOLARGE_L => 33;      # l= value exceeds body size
+use constant DKIM_SIGERROR_MBSFAILED => 34;       # "must be signed" failure
+use constant DKIM_SIGERROR_KEYVERSION => 35;      # unknown key version
+use constant DKIM_SIGERROR_KEYUNKNOWNHASH => 36;  # unknown key hash
+use constant DKIM_SIGERROR_KEYHASHMISMATCH => 37; # sig-key hash mismatch
+use constant DKIM_SIGERROR_NOTEMAILKEY => 38;     # not an e-mail key
+use constant DKIM_SIGERROR_UNUSED2 => 39;         # OBSOLETE
+use constant DKIM_SIGERROR_KEYTYPEMISSING => 40;  # key type missing
+use constant DKIM_SIGERROR_KEYTYPEUNKNOWN => 41;  # key type unknown
+use constant DKIM_SIGERROR_KEYREVOKED => 42;      # key revoked
+use constant DKIM_SIGERROR_KEYDECODE => 43;       # key couldn't be decoded
+use constant DKIM_SIGERROR_MISSING_V => 44;       # v= tag missing
+use constant DKIM_SIGERROR_EMPTY_V => 45;         # v= tag empty
+use constant DKIM_SIGERROR_KEYTOOSMALL => 46;     # too few key bits
+
+use constant DKIM_DNS_ERROR => -1;        # error in transit
+use constant DKIM_DNS_SUCCESS => 0;       # reply available
+use constant DKIM_DNS_NOREPLY => 1;       # reply not available (yet)
+use constant DKIM_DNS_EXPIRED => 2;       # no reply, query expired
+use constant DKIM_DNS_INVALID => 3;       # invalid request
+
+use constant DKIM_CANON_UNKNOWN => -1;    # unknown method
+use constant DKIM_CANON_SIMPLE => 0;      # as specified in DKIM spec
+use constant DKIM_CANON_RELAXED => 1;     # as specified in DKIM spec
 use constant DKIM_CANON_DEFAULT => DKIM_CANON_SIMPLE;
 
-use constant DKIM_SIGN_RSASHA1 => 0;
-use constant DKIM_SIGN_RSASHA256 => 1;
+use constant DKIM_SIGN_UNKNOWN => -2;     # unknown method
+use constant DKIM_SIGN_DEFAULT => -1;     # use internal default
+use constant DKIM_SIGN_RSASHA1 => 0;      # an RSA-signed SHA1 digest
+use constant DKIM_SIGN_RSASHA256 => 1;    # an RSA-signed SHA256 digest
 
-use constant DKIM_STAT_OK => 0;  # dkim.h
-use constant DKIM_STAT_BADSIG => 1;
-use constant DKIM_STAT_NOSIG => 2;
-use constant DKIM_STAT_NOKEY => 3;
-use constant DKIM_STAT_CANTVRFY => 4;
-use constant DKIM_STAT_SYNTAX => 5;
-use constant DKIM_STAT_NORESOURCE => 6;
-use constant DKIM_STAT_INVALID => 9;
-use constant DKIM_STAT_NOTIMPLEMENT => 10;
+use constant DKIM_QUERY_UNKNOWN => -1;    # unknown method
+use constant DKIM_QUERY_DNS => 0;         # DNS query method (per the draft)
+use constant DKIM_QUERY_FILE => 1;        # text file method (for testing)
+use constant DKIM_QUERY_DEFAULT => DKIM_QUERY_DNS;
+
+use constant DKIM_PARAM_UNKNOWN => -1;    # unknown
+use constant DKIM_PARAM_SIGNATURE => 0;   # b
+use constant DKIM_PARAM_SIGNALG => 1;     # a
+use constant DKIM_PARAM_DOMAIN => 2;      # d
+use constant DKIM_PARAM_CANONALG => 3;    # c
+use constant DKIM_PARAM_QUERYMETHOD => 4; # q
+use constant DKIM_PARAM_SELECTOR => 5;    # s
+use constant DKIM_PARAM_HDRLIST => 6;     # h
+use constant DKIM_PARAM_VERSION => 7;     # v
+use constant DKIM_PARAM_IDENTITY => 8;    # i
+use constant DKIM_PARAM_TIMESTAMP => 9;   # t
+use constant DKIM_PARAM_EXPIRATION => 10; # x
+use constant DKIM_PARAM_COPIEDHDRS => 11; # z
+use constant DKIM_PARAM_BODYHASH => 12;   # bh
+use constant DKIM_PARAM_BODYLENGTH => 13; # l
 
 use constant DKIM_MODE_UNKNOWN => -1;
 use constant DKIM_MODE_SIGN => 0;
 use constant DKIM_MODE_VERIFY => 1;
 
-use constant DKIM_POLICY_NONE => -1;
-use constant DKIM_POLICY_UNKNOWN => 0;
-use constant DKIM_POLICY_ALL => 1;
-use constant DKIM_POLICY_DISCARDABLE => 2;
+use constant DKIM_OP_GETOPT => 0;
+use constant DKIM_OP_SETOPT => 1;
 
-use constant DKIM_PRESULT_NONE => -1;
-use constant DKIM_PRESULT_NXDOMAIN => 0;
-use constant DKIM_PRESULT_FOUND => 1;
+use constant DKIM_OPTS_FLAGS => 0;
+use constant DKIM_OPTS_TMPDIR => 1;
+use constant DKIM_OPTS_TIMEOUT => 2;
+use constant DKIM_OPTS_SENDERHDRS => 3; # obsolete
+use constant DKIM_OPTS_SIGNHDRS => 4;
+use constant DKIM_OPTS_OVERSIGNHDRS => 5;
+use constant DKIM_OPTS_QUERYMETHOD => 6;
+use constant DKIM_OPTS_QUERYINFO => 7;
+use constant DKIM_OPTS_FIXEDTIME => 8;
+use constant DKIM_OPTS_SKIPHDRS => 9;
+use constant DKIM_OPTS_ALWAYSHDRS => 10; # obsolete
+use constant DKIM_OPTS_SIGNATURETTL => 11;
+use constant DKIM_OPTS_CLOCKDRIFT => 12;
+use constant DKIM_OPTS_MUSTBESIGNED => 13;
+use constant DKIM_OPTS_MINKEYBITS => 14;
+use constant DKIM_OPTS_REQUIREDHDRS => 15;
+
+use constant DKIM_LIBFLAGS_NONE => 0x00000000;
+use constant DKIM_LIBFLAGS_TMPFILES => 0x00000001;
+use constant DKIM_LIBFLAGS_KEEPFILES => 0x00000002;
+use constant DKIM_LIBFLAGS_SIGNLEN => 0x00000004;
+use constant DKIM_LIBFLAGS_CACHE => 0x00000008;
+use constant DKIM_LIBFLAGS_ZTAGS => 0x00000010;
+use constant DKIM_LIBFLAGS_DELAYSIGPROC => 0x00000020;
+use constant DKIM_LIBFLAGS_EOHCHECK => 0x00000040;
+use constant DKIM_LIBFLAGS_ACCEPTV05 => 0x00000080;
+use constant DKIM_LIBFLAGS_FIXCRLF => 0x00000100;
+use constant DKIM_LIBFLAGS_ACCEPTDK => 0x00000200;
+use constant DKIM_LIBFLAGS_BADSIGHANDLES => 0x00000400;
+use constant DKIM_LIBFLAGS_VERIFYONE => 0x00000800;
+use constant DKIM_LIBFLAGS_STRICTHDRS => 0x00001000;
+use constant DKIM_LIBFLAGS_REPORTBADADSP => 0x00002000;
+use constant DKIM_LIBFLAGS_DROPSIGNER => 0x00004000;
+use constant DKIM_LIBFLAGS_STRICTRESIGN => 0x00008000;
+use constant DKIM_LIBFLAGS_REQUESTREPORTS => 0x00010000;
+use constant DKIM_LIBFLAGS_DEFAULT => DKIM_LIBFLAGS_NONE;
 
 use constant DKIM_DNSSEC_UNKNOWN => -1;
+use constant DKIM_DNSSEC_BOGUS => 0;
+use constant DKIM_DNSSEC_INSECURE => 1;
+use constant DKIM_DNSSEC_SECURE => 2;
+
+use constant DKIM_ATPS_UNKNOWN => (-1);
+use constant DKIM_ATPS_NOTFOUND => 0;
+use constant DKIM_ATPS_FOUND => 1;
+
+use constant DKIM_SIGFLAG_IGNORE => 0x01;
+use constant DKIM_SIGFLAG_PROCESSED => 0x02;
+use constant DKIM_SIGFLAG_PASSED => 0x04;
+use constant DKIM_SIGFLAG_TESTKEY => 0x08;
+use constant DKIM_SIGFLAG_NOSUBDOMAIN => 0x10;
+use constant DKIM_SIGFLAG_KEYLOADED => 0x20;
 
 use constant DKIM_SIGBH_UNTESTED => -1;
 use constant DKIM_SIGBH_MATCH => 0;
 use constant DKIM_SIGBH_MISMATCH => 1;
 
-use constant DKIM_SIGERROR_VERSION => 1;
-
 use constant DKIM_FEATURE_DIFFHEADERS => 0;
-use constant DKIM_FEATURE_DKIM_REPUTATION => 1;
+use constant DKIM_FEATURE_UNUSED => 1;
 use constant DKIM_FEATURE_PARSE_TIME => 2;
 use constant DKIM_FEATURE_QUERY_CACHE => 3;
 use constant DKIM_FEATURE_SHA256 => 4;
@@ -67,76 +207,201 @@ use constant DKIM_FEATURE_OVERSIGN => 5;
 use constant DKIM_FEATURE_DNSSEC => 6;
 use constant DKIM_FEATURE_RESIGN => 7;
 use constant DKIM_FEATURE_ATPS => 8;
-
-use constant DKIM_SIGFLAG_IGNORE => 1;
-
-use constant DKIM_OP_GETOPT => 0;
-use constant DKIM_OP_SETOPT => 1;
-
-use constant DKIM_OPTS_FLAGS => 0;
-use constant DKIM_OPTS_TMPDIR => 1;
-
-use constant DKIM_LIBFLAGS_FIXCRLF => 0x0100;
+use constant DKIM_FEATURE_XTAGS => 9;
+use constant DKIM_FEATURE_MAX => 9;
 
 our @EXPORT_OK = ( @{ $EXPORT_TAGS{'all'} } );
 
 our @EXPORT = qw(
-  DKIM_CANON_RELAXED
-  DKIM_CANON_SIMPLE
 
-  DKIM_SIGN_RSASHA1
-  DKIM_SIGN_RSASHA256
+    DKIM_STAT_OK
+    DKIM_STAT_BADSIG
+    DKIM_STAT_NOSIG
+    DKIM_STAT_NOKEY
+    DKIM_STAT_CANTVRFY
+    DKIM_STAT_SYNTAX
+    DKIM_STAT_NORESOURCE
+    DKIM_STAT_INTERNAL
+    DKIM_STAT_REVOKED
+    DKIM_STAT_INVALID
+    DKIM_STAT_NOTIMPLEMENT
+    DKIM_STAT_KEYFAIL
+    DKIM_STAT_CBREJECT
+    DKIM_STAT_CBINVALID
+    DKIM_STAT_CBTRYAGAIN
+    DKIM_STAT_CBERROR
+    DKIM_STAT_MULTIDNSREPLY
+    DKIM_STAT_SIGGEN
 
-  DKIM_STAT_OK
-  DKIM_STAT_BADSIG
-  DKIM_STAT_NOSIG
-  DKIM_STAT_NOKEY
-  DKIM_STAT_CANTVRFY
-  DKIM_STAT_SYNTAX
-  DKIM_STAT_NORESOURCE
-  DKIM_STAT_INVALID
-  DKIM_STAT_NOTIMPLEMENT
+    DKIM_CBSTAT_CONTINUE
+    DKIM_CBSTAT_REJECT
+    DKIM_CBSTAT_TRYAGAIN
+    DKIM_CBSTAT_NOTFOUND
+    DKIM_CBSTAT_ERROR
+    DKIM_CBSTAT_DEFAULT
 
-  DKIM_MODE_UNKNOWN
-  DKIM_MODE_SIGN
-  DKIM_MODE_VERIFY
+    DKIM_SIGERROR_UNKNOWN
+    DKIM_SIGERROR_OK
+    DKIM_SIGERROR_VERSION
+    DKIM_SIGERROR_DOMAIN
+    DKIM_SIGERROR_EXPIRED
+    DKIM_SIGERROR_FUTURE
+    DKIM_SIGERROR_TIMESTAMPS
+    DKIM_SIGERROR_UNUSED
+    DKIM_SIGERROR_INVALID_HC
+    DKIM_SIGERROR_INVALID_BC
+    DKIM_SIGERROR_MISSING_A
+    DKIM_SIGERROR_INVALID_A
+    DKIM_SIGERROR_MISSING_H
+    DKIM_SIGERROR_INVALID_L
+    DKIM_SIGERROR_INVALID_Q
+    DKIM_SIGERROR_INVALID_QO
+    DKIM_SIGERROR_MISSING_D
+    DKIM_SIGERROR_EMPTY_D
+    DKIM_SIGERROR_MISSING_S
+    DKIM_SIGERROR_EMPTY_S
+    DKIM_SIGERROR_MISSING_B
+    DKIM_SIGERROR_EMPTY_B
+    DKIM_SIGERROR_CORRUPT_B
+    DKIM_SIGERROR_NOKEY
+    DKIM_SIGERROR_DNSSYNTAX
+    DKIM_SIGERROR_KEYFAIL
+    DKIM_SIGERROR_MISSING_BH
+    DKIM_SIGERROR_EMPTY_BH
+    DKIM_SIGERROR_CORRUPT_BH
+    DKIM_SIGERROR_BADSIG
+    DKIM_SIGERROR_SUBDOMAIN
+    DKIM_SIGERROR_MULTIREPLY
+    DKIM_SIGERROR_EMPTY_H
+    DKIM_SIGERROR_INVALID_H
+    DKIM_SIGERROR_TOOLARGE_L
+    DKIM_SIGERROR_MBSFAILED
+    DKIM_SIGERROR_KEYVERSION
+    DKIM_SIGERROR_KEYUNKNOWNHASH
+    DKIM_SIGERROR_KEYHASHMISMATCH
+    DKIM_SIGERROR_NOTEMAILKEY
+    DKIM_SIGERROR_UNUSED2
+    DKIM_SIGERROR_KEYTYPEMISSING
+    DKIM_SIGERROR_KEYTYPEUNKNOWN
+    DKIM_SIGERROR_KEYREVOKED
+    DKIM_SIGERROR_KEYDECODE
+    DKIM_SIGERROR_MISSING_V
+    DKIM_SIGERROR_EMPTY_V
+    DKIM_SIGERROR_KEYTOOSMALL
 
-  DKIM_POLICY_NONE
-  DKIM_POLICY_UNKNOWN
-  DKIM_POLICY_ALL
-  DKIM_POLICY_DISCARDABLE
+    DKIM_DNS_ERROR
+    DKIM_DNS_SUCCESS
+    DKIM_DNS_NOREPLY
+    DKIM_DNS_EXPIRED
+    DKIM_DNS_INVALID
 
-  DKIM_DNSSEC_UNKNOWN
+    DKIM_CANON_UNKNOWN
+    DKIM_CANON_SIMPLE
+    DKIM_CANON_RELAXED
+    DKIM_CANON_DEFAULT
 
-  DKIM_SIGBH_UNTESTED
-  DKIM_SIGBH_MATCH
-  DKIM_SIGBH_MISMATCH
+    DKIM_SIGN_UNKNOWN
+    DKIM_SIGN_DEFAULT
+    DKIM_SIGN_RSASHA1
+    DKIM_SIGN_RSASHA256
 
-  DKIM_SIGERROR_VERSION
+    DKIM_QUERY_UNKNOWN
+    DKIM_QUERY_DNS
+    DKIM_QUERY_FILE
+    DKIM_QUERY_DEFAULT
 
-  DKIM_PRESULT_NONE
-  DKIM_PRESULT_NXDOMAIN
-  DKIM_PRESULT_FOUND
+    DKIM_PARAM_UNKNOWN
+    DKIM_PARAM_SIGNATURE
+    DKIM_PARAM_SIGNALG
+    DKIM_PARAM_DOMAIN
+    DKIM_PARAM_CANONALG
+    DKIM_PARAM_QUERYMETHOD
+    DKIM_PARAM_SELECTOR
+    DKIM_PARAM_HDRLIST
+    DKIM_PARAM_VERSION
+    DKIM_PARAM_IDENTITY
+    DKIM_PARAM_TIMESTAMP
+    DKIM_PARAM_EXPIRATION
+    DKIM_PARAM_COPIEDHDRS
+    DKIM_PARAM_BODYHASH
+    DKIM_PARAM_BODYLENGTH
 
-  DKIM_FEATURE_DIFFHEADERS
-  DKIM_FEATURE_DKIM_REPUTATION
-  DKIM_FEATURE_PARSE_TIME
-  DKIM_FEATURE_QUERY_CACHE
-  DKIM_FEATURE_SHA256
-  DKIM_FEATURE_OVERSIGN
-  DKIM_FEATURE_DNSSEC
-  DKIM_FEATURE_RESIGN
-  DKIM_FEATURE_ATPS
+    DKIM_MODE_UNKNOWN
+    DKIM_MODE_SIGN
+    DKIM_MODE_VERIFY
 
-  DKIM_SIGFLAG_IGNORE
+    DKIM_OP_GETOPT
+    DKIM_OP_SETOPT
 
-  DKIM_OP_GETOPT
-  DKIM_OP_SETOPT
+    DKIM_OPTS_FLAGS
+    DKIM_OPTS_TMPDIR
+    DKIM_OPTS_TIMEOUT
+    DKIM_OPTS_SENDERHDRS
+    DKIM_OPTS_SIGNHDRS
+    DKIM_OPTS_OVERSIGNHDRS
+    DKIM_OPTS_QUERYMETHOD
+    DKIM_OPTS_QUERYINFO
+    DKIM_OPTS_FIXEDTIME
+    DKIM_OPTS_SKIPHDRS
+    DKIM_OPTS_ALWAYSHDRS
+    DKIM_OPTS_SIGNATURETTL
+    DKIM_OPTS_CLOCKDRIFT
+    DKIM_OPTS_MUSTBESIGNED
+    DKIM_OPTS_MINKEYBITS
+    DKIM_OPTS_REQUIREDHDRS
 
-  DKIM_OPTS_FLAGS
-  DKIM_OPTS_TMPDIR
+    DKIM_LIBFLAGS_NONE
+    DKIM_LIBFLAGS_TMPFILES
+    DKIM_LIBFLAGS_KEEPFILES
+    DKIM_LIBFLAGS_SIGNLEN
+    DKIM_LIBFLAGS_CACHE
+    DKIM_LIBFLAGS_ZTAGS
+    DKIM_LIBFLAGS_DELAYSIGPROC
+    DKIM_LIBFLAGS_EOHCHECK
+    DKIM_LIBFLAGS_ACCEPTV05
+    DKIM_LIBFLAGS_FIXCRLF
+    DKIM_LIBFLAGS_ACCEPTDK
+    DKIM_LIBFLAGS_BADSIGHANDLES
+    DKIM_LIBFLAGS_VERIFYONE
+    DKIM_LIBFLAGS_STRICTHDRS
+    DKIM_LIBFLAGS_REPORTBADADSP
+    DKIM_LIBFLAGS_DROPSIGNER
+    DKIM_LIBFLAGS_STRICTRESIGN
+    DKIM_LIBFLAGS_REQUESTREPORTS
+    DKIM_LIBFLAGS_DEFAULT
 
-  DKIM_LIBFLAGS_FIXCRLF
+    DKIM_DNSSEC_UNKNOWN
+    DKIM_DNSSEC_BOGUS
+    DKIM_DNSSEC_INSECURE
+    DKIM_DNSSEC_SECURE
+
+    DKIM_ATPS_UNKNOWN
+    DKIM_ATPS_NOTFOUND
+    DKIM_ATPS_FOUND
+
+    DKIM_SIGFLAG_IGNORE
+    DKIM_SIGFLAG_PROCESSED
+    DKIM_SIGFLAG_PASSED
+    DKIM_SIGFLAG_TESTKEY
+    DKIM_SIGFLAG_NOSUBDOMAIN
+    DKIM_SIGFLAG_KEYLOADED
+
+    DKIM_SIGBH_UNTESTED
+    DKIM_SIGBH_MATCH
+    DKIM_SIGBH_MISMATCH
+
+    DKIM_FEATURE_DIFFHEADERS
+    DKIM_FEATURE_UNUSED
+    DKIM_FEATURE_PARSE_TIME
+    DKIM_FEATURE_QUERY_CACHE
+    DKIM_FEATURE_SHA256
+    DKIM_FEATURE_OVERSIGN
+    DKIM_FEATURE_DNSSEC
+    DKIM_FEATURE_RESIGN
+    DKIM_FEATURE_ATPS
+    DKIM_FEATURE_XTAGS
+    DKIM_FEATURE_MAX
+
 );
 
 use vars qw($VERSION);
@@ -442,27 +707,6 @@ sub dkim_set_key_lookup
   return _dkim_set_key_lookup($self->{_dkimlib_handle}, $$args{func});
 }
 
-=head2 dkim_set_policy_lookup
-
-For further information, refer to http://www.opendkim.org/libopendkim/
-
-=cut
-
-sub dkim_set_policy_lookup
-{
-  my ($self, $args) = @_;
-
-  unless($self->{_dkimlib_handle}) {
-    throw Error::Simple('dkim_set_policy_lookup called before dkim_sign/dkim_verify');
-  }
-  foreach(qw(func)) {
-    exists($$args{$_}) or throw Error::Simple("dkim_set_policy_lookup missing argument '$_'");
-    defined($$args{$_}) or throw Error::Simple("dkim_set_policy_lookup undefined argument '$_'");
-  }
-
-  return _dkim_set_policy_lookup($self->{_dkimlib_handle}, $$args{func});
-}
-
 =head2 dkim_set_signature_handle
 
 For further information, refer to http://www.opendkim.org/libopendkim/
@@ -652,14 +896,6 @@ Static method.
 
 Static method.
 
-=head2 dkim_getpolicystr
-
-Calls C routine of same name.
-
-=head2 dkim_getpresultstr
-
-Calls C routine of same name.
-
 =head2 dkim_getresultstr
 
 Calls C routine of same name.
@@ -689,12 +925,12 @@ RFC 4870, RFC 4871
 This module requires these other modules and libraries:
 
   Test::More
-  libOpenDKIM 2.3 (http://www.opendkim.org/libopendkim/)
+  libOpenDKIM 2.10 (http://www.opendkim.org/libopendkim/)
   C compiler
 
 =head1 NOTES
 
-Tested against libOpenDKIM 2.3.1. Known to fail to compile against 2.2.
+Tested against libOpenDKIM 2.10.3.
 
 Only portions of Mail::DKIM::Signer interface, and the support for it,
 have been implemented.

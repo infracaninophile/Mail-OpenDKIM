@@ -17,7 +17,6 @@
 static SV *dns_callback = (SV *)NULL;
 static SV *final_callback = (SV *)NULL;
 static SV *key_lookup_callback = (SV *)NULL;
-static SV *policy_lookup_callback = (SV *)NULL;
 static SV *prescreen_callback = (SV *)NULL;
 static SV *signature_handle_callback = (SV *)NULL;
 static SV *signature_handle_free_callback = (SV *)NULL;
@@ -145,50 +144,6 @@ call_key_lookup_callback(DKIM *dkim, DKIM_SIGINFO *siginfo, unsigned char *buf, 
 
 	if(count != 1) {
 		croak("Internal error: key_lookup_callback routine returned %d items, 1 was expected",
-			count);
-		return DKIM_CBSTAT_ERROR;
-	}
-
-	status = POPi;
-
-	PUTBACK;
-	FREETMPS;
-	LEAVE;
-
-	return status;
-}
-
-/*
- * called when the OpenDKIMlibrary wants to call the callback function provided to
- * dkim_set_policy_lookup
- */
-static DKIM_CBSTAT
-call_policy_lookup_callback(DKIM *dkim, unsigned char *query, _Bool excheck, unsigned char *buf, size_t buflen, int *qstat)
-{
-	dSP;
-	int count, status;
-	SV *sv = policy_lookup_callback;
-
-	if(sv == NULL) {
-		croak("Internal error: call_policy_lookup_callback called, but nothing to call");
-		return DKIM_CBSTAT_ERROR;
-	}
-
-	PUSHMARK(SP);
-	XPUSHs(sv_2mortal(newSVpv((void *)dkim, SIZEOF_DKIM)));
-	XPUSHs(sv_2mortal(newSVpv((void *)query, 0)));
-	XPUSHs(sv_2mortal(newSViv(excheck)));
-	XPUSHs(sv_2mortal(newSVpv((void *)buf, buflen + 1)));
-	XPUSHs(sv_2mortal(newSViv(buflen)));
-	XPUSHs(sv_2mortal(newSVpv((void *)qstat, sizeof(int))));
-	PUTBACK;
-
-	count = call_sv(sv, G_SCALAR);
-
-	SPAGAIN;
-
-	if(count != 1) {
-		croak("Internal error: policy_lookup_callback routine returned %d items, 1 was expected",
 			count);
 		return DKIM_CBSTAT_ERROR;
 	}
@@ -503,22 +458,6 @@ dkim_libversion()
 		RETVAL
 
 const char *
-dkim_getpolicystr(policy)
-		dkim_policy_t policy
-	CODE:
-		RETVAL = dkim_getpolicystr(policy);
-	OUTPUT:
-		RETVAL
-
-const char *
-dkim_getpresultstr(policy)
-		dkim_policy_t policy
-	CODE:
-		RETVAL = dkim_getpresultstr(policy);
-	OUTPUT:
-		RETVAL
-
-const char *
 dkim_getresultstr(result)
 		DKIM_STAT result
 	CODE:
@@ -706,20 +645,6 @@ _dkim_set_prescreen(libopendkim, func)
 			SvSetSV(prescreen_callback, func);
 
 		RETVAL = dkim_set_prescreen(libopendkim, call_prescreen_callback);
-	OUTPUT:
-		RETVAL
-
-DKIM_STAT
-_dkim_set_policy_lookup(libopendkim, func)
-		DKIM_LIB *libopendkim
-		SV *func
-	CODE:
-		if(policy_lookup_callback == (SV *)NULL)
-			policy_lookup_callback = newSVsv(func);
-		else
-			SvSetSV(policy_lookup_callback, func);
-
-		RETVAL = dkim_set_policy_lookup(libopendkim, call_policy_lookup_callback);
 	OUTPUT:
 		RETVAL
 
@@ -981,18 +906,6 @@ _dkim_diffheaders(dkim, canon, maxcost, ohdrs, nohdrs, out, nout)
 		RETVAL
 
 DKIM_STAT
-_dkim_get_reputation(dkim, sig, qroot, rep)
-		DKIM *dkim
-		DKIM_SIGINFO *sig
-		char *qroot
-		int rep = NO_INIT
-	CODE:
-		RETVAL = dkim_get_reputation(dkim, sig, qroot, &rep);
-	OUTPUT:
-		rep
-		RETVAL
-
-DKIM_STAT
 _dkim_getsighdr(dkim, buf, len, initial)
 		DKIM *dkim
 		unsigned char *buf
@@ -1114,49 +1027,6 @@ _dkim_getmode(dkim)
 	CODE:
 		RETVAL = dkim_getmode(dkim);
 	OUTPUT:
-		RETVAL
-
-DKIM_STAT
-_dkim_policy(dkim, pcode, pflags, pstate)
-		DKIM *dkim;
-		dkim_policy_t pcode = NO_INIT
-		unsigned int pflags = NO_INIT
-		DKIM_PSTATE *pstate
-	CODE:
-		RETVAL = dkim_policy(dkim, &pcode, &pflags, pstate);
-	OUTPUT:
-		pcode
-		pflags
-		RETVAL
-
-DKIM_PSTATE *
-_dkim_policy_state_new(dkim)
-		DKIM *dkim;
-	CODE:
-		RETVAL = dkim_policy_state_new(dkim);
-	OUTPUT:
-		RETVAL
-
-void
-_dkim_policy_state_free(pstate)
-		DKIM_PSTATE *pstate;
-	CODE:
-		dkim_policy_state_free(pstate);
-
-DKIM_STAT
-_dkim_policy_getreportinfo(dkim, addrbuf, addrlen, optsbuf, optslen, smtpbuf, smtplen, interval)
-		DKIM *dkim
-		char *addrbuf
-		size_t addrlen
-		char *optsbuf
-		size_t optslen
-		char *smtpbuf
-		size_t smtplen
-		unsigned int interval = NO_INIT
-	CODE:
-		RETVAL = dkim_policy_getreportinfo(dkim, addrbuf, addrlen, optsbuf, optslen, smtpbuf, smtplen, &interval);
-	OUTPUT:
-		interval
 		RETVAL
 
 unsigned int
@@ -1339,6 +1209,16 @@ _dkim_sig_process(dkim, sig)
 	OUTPUT:
 		RETVAL
 
+int
+_dkim_sig_syntax(dkim, str, len)
+                DKIM *dkim
+                unsigned char *str
+                size_t len
+	CODE:
+		RETVAL = dkim_sig_syntax(dkim, str, len);
+	OUTPUT:
+                RETVAL
+
 unsigned char *
 _dkim_sig_gettagvalue(sig, keytag, tag)
 		DKIM_SIGINFO *sig
@@ -1346,42 +1226,6 @@ _dkim_sig_gettagvalue(sig, keytag, tag)
 		char *tag
 	CODE:
 		RETVAL = dkim_sig_gettagvalue(sig, keytag, tag);
-	OUTPUT:
-		RETVAL
-
-int
-_dkim_policy_getdnssec(dkim)
-		DKIM *dkim
-	CODE:
-		RETVAL = dkim_policy_getdnssec(dkim);
-	OUTPUT:
-		RETVAL
-
-int
-_dkim_policy_syntax(dkim, str, len)
-		DKIM *dkim
-		unsigned char *str
-		size_t len
-	CODE:
-		RETVAL = dkim_policy_syntax(dkim, str, len);
-	OUTPUT:
-		RETVAL
-
-int
-_dkim_sig_syntax(dkim, str, len)
-		DKIM *dkim
-		unsigned char *str
-		size_t len
-	CODE:
-		RETVAL = dkim_policy_syntax(dkim, str, len);
-	OUTPUT:
-		RETVAL
-
-int
-_dkim_getpresult(dkim)
-		DKIM *dkim
-	CODE:
-		RETVAL = dkim_getpresult(dkim);
 	OUTPUT:
 		RETVAL
 
