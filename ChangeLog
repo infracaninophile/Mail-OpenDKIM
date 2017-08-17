@@ -1,3 +1,7 @@
+2017-08-17  Matthew Seaman <m.seaman@infracaninophile.co.uk>
+
+	* lib/Mail/OpenDKIM/Signer: process KeyFile argument correctly
+
 2015-08-28  Matthew Seaman <m.seaman@infracaninophile.co.uk>
 
 	* typemap: remove now unused policy-related types.
